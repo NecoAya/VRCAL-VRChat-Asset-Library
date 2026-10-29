@@ -4,10 +4,11 @@ import path from 'node:path';
 import {createGunzip,inflateSync} from 'node:zlib';
 import * as yauzl from 'yauzl';
 import {noLinks} from './project-access';
-import {modelFormat,safeModelPath,resolveModelResource,ModelTextureBudget,MODEL_MAX_BYTES,MODEL_BUNDLE_BYTES,MODEL_TEXTURE_BYTES,type ModelBundle,type ModelFormat,type ModelSceneBundle} from '../shared/model-preview';
+import {modelFormat,safeModelPath,resolveModelResource,ModelTextureBudget,MODEL_MAX_BYTES,MODEL_BUNDLE_BYTES,MODEL_TEXTURE_BYTES,MODEL_PREFAB_MAX_BYTES,MODEL_PREFAB_MAX_MATERIALS,MODEL_PREFAB_MAX_MESHES,type ModelBundle,type ModelFormat,type ModelSceneBundle,type PrefabMaterial,type PrefabScene} from '../shared/model-preview';
+import {buildMetaIndex,mirrorPrefabTransform,parseMaterial,parsePrefab} from './unity-prefab';
 
-const MAX_ENTRIES=12000,MAX_UNPACKED=512*1024*1024;
-const renderFile=(name:string)=>!!modelFormat(name)||/\.(png|jpe?g|webp|bmp|tga|dds|bin|mtl)$/i.test(name);
+const MAX_ENTRIES=12000,MAX_UNPACKED=512*1024*1024,MODEL_META_MAX=2048;
+const renderFile=(name:string)=>!!modelFormat(name)||/\.(png|jpe?g|webp|bmp|tga|dds|bin|mtl|mat|meta)$/i.test(name);
 const imageFile=(name:string)=>/\.(png|jpe?g|webp|bmp|tga|dds)$/i.test(name);
 interface Entry {name:string;key:string;size:number}
 export interface ModelSource extends Entry {source:string;stamp:string;format:ModelFormat;label:string;scope?:'file'|'container'}
@@ -97,8 +98,40 @@ async function prepareWithBudget(model:ModelSource,scene:SceneReadBudget,slot:st
  const textureNames=new Set<string>();
  const dependency=(uri:string,base=model.name,required=false,texture=false)=>{if(uri.startsWith('data:'))return;const name=resolveModelResource(uri,base,names),entry=entries.find(e=>e.name===name);if(!entry){if(required)throw new Error('模型缺少本地依赖，或引用了外部网络资源。');warnings.push(`未找到本地贴图：${uri.slice(0,160)}`);return}if(texture)textureNames.add(entry.name);add(entry,required)};
  const embedded=new Set<string>(),reserveEmbedded=(key:string)=>{if(embedded.has(key))return;if(scene.files>=96)throw new Error('嵌入图片超过组合预览文件数量预算。');scene.files++;embedded.add(key)};
- let gltf:any,glbBinary:Buffer|undefined;const budget:Pick<ModelTextureBudget,'add'>={add:(key,bytes,name)=>scene.textures.add(slot+':'+key,bytes,name)};
- if(model.format==='gltf'||model.format==='glb'){
+ let gltf:any,glbBinary:Buffer|undefined,prefab:PrefabScene|undefined;const budget:Pick<ModelTextureBudget,'add'>={add:(key,bytes,name)=>scene.textures.add(slot+':'+key,bytes,name)};
+ if(model.format==='prefab'){
+  if(current.size>MODEL_PREFAB_MAX_BYTES)throw new Error('Prefab 超过 8 MiB 轻量预览上限，请选择更小的预制件。');
+  const metaEntries=entries.filter(entry=>/\.meta$/i.test(entry.name)&&entry.size>0&&entry.size<=64*1024).slice(0,MODEL_META_MAX);
+  for(const entry of metaEntries)add(entry);
+  const meta=await read(metaEntries),index=buildMetaIndex(metaEntries.map(entry=>({name:entry.name,text:meta.get(entry.key)!.toString('utf8')})));
+  const parsed=parsePrefab(raw.toString('utf8'),index);warnings.push(...parsed.warnings);
+  if(!parsed.draft)throw new Error(parsed.warnings[0]??'这个文件不是可读取的 Unity Prefab。');
+  const draft=parsed.draft;
+  const named=new Map(entries.map(entry=>[entry.name.toLowerCase(),entry])),basenames=new Map<string,Entry|undefined>();
+  for(const entry of entries){const leaf=entry.name.toLowerCase().split('/').pop()!;basenames.set(leaf,basenames.has(leaf)?undefined:entry)}
+  /** A prefab references assets by path; a unique basename is only a fallback for packages whose stored prefix differs. */
+  const locate=(relative:string)=>named.get(relative.toLowerCase())??basenames.get(relative.toLowerCase().split('/').pop()!);
+  const materialPaths=new Set<string>();
+  for(const node of draft.nodes){
+   if(node.mesh){const entry=locate(node.mesh);if(entry)add(entry,true);else warnings.push(`Prefab 引用的模型 ${node.mesh.slice(0,160)} 不在此素材的读取范围内。`)}
+   for(const path of node.materials)materialPaths.add(path);
+  }
+  if(materialPaths.size>MODEL_PREFAB_MAX_MATERIALS)throw new Error(`Prefab 引用了超过 ${MODEL_PREFAB_MAX_MATERIALS} 个材质，请选择更小的预制件。`);
+  const materialEntries=[...materialPaths].map(locate).filter((entry):entry is Entry=>!!entry);
+  for(const entry of materialEntries)add(entry);
+  const content2=await read(materialEntries),materials:PrefabMaterial[]=[];
+  for(const path of materialPaths){
+   const entry=locate(path);if(!entry){warnings.push(`Prefab 引用的材质 ${path.slice(0,160)} 不在此素材的读取范围内。`);continue}
+   const parsed2=parseMaterial(content2.get(entry.key)!.toString('utf8'),index),item=parsed2.material;
+   if(!item)continue;
+   item.file=entry.name;warnings.push(...parsed2.warnings);
+   if(item.texture){const texture=locate(item.texture);if(texture){add(texture);textureNames.add(texture.name)}else warnings.push(`材质 ${path.slice(0,120)} 的贴图 ${item.texture.slice(0,120)} 不在此素材的读取范围内。`)}
+   materials.push(item);
+  }
+  prefab={nodes:draft.nodes.map(node=>({id:node.id,name:node.name,parent:node.parent,transform:mirrorPrefabTransform(node.raw),mesh:node.mesh,submesh:node.submesh,materials:node.materials})),materials,warnings:[]};
+  if(draft.meshes.size>MODEL_PREFAB_MAX_MESHES)throw new Error(`Prefab 引用了超过 ${MODEL_PREFAB_MAX_MESHES} 个模型文件，请选择更小的预制件。`);
+ }
+ else if(model.format==='gltf'||model.format==='glb'){
   let data:unknown;if(model.format==='gltf')data=JSON.parse(raw.toString('utf8'));else{if(raw.length<20||raw.toString('ascii',0,4)!=='glTF'||raw.readUInt32LE(4)!==2||raw.readUInt32LE(8)!==raw.length||raw.readUInt32LE(16)!==0x4e4f534a||raw.readUInt32LE(12)>raw.length-20)throw new Error('GLB 文件头无效。');data=JSON.parse(raw.subarray(20,20+raw.readUInt32LE(12)).toString('utf8'))}
   gltf=data;if(!gltf||typeof gltf!=='object'||!Array.isArray(gltf.images??[])||!Array.isArray(gltf.buffers??[])||(gltf.images?.length||0)>96)throw new Error('glTF 图片或依赖定义超出预览限制。');
   if((gltf.extensionsRequired||[]).some((name:string)=>['KHR_draco_mesh_compression','EXT_meshopt_compression','KHR_texture_basisu'].includes(name)))throw new Error('轻量预览暂不支持 Draco、Meshopt 或 KTX2 压缩资源，请使用普通 FBX／OBJ／glTF。');
@@ -115,7 +148,8 @@ async function prepareWithBudget(model:ModelSource,scene:SceneReadBudget,slot:st
   else if(image.bufferView!==undefined){const view=gltf.bufferViews?.[image.bufferView];if(!view||!Number.isSafeInteger(view.byteLength)||view.byteLength<0||view.byteLength>MODEL_TEXTURE_BYTES)throw new Error('嵌入贴图数据范围无效。');reserveEmbedded(`view:${image.bufferView}`);const buffer=gltf.buffers?.[view.buffer];let bytes:Buffer|undefined;if(buffer?.uri?.startsWith('data:'))bytes=decodeData(buffer.uri,MODEL_MAX_BYTES);else if(buffer?.uri){const name=resolveModelResource(buffer.uri,model.name,names),entry=selected.find(e=>e.name===name);bytes=entry&&content.get(entry.key)}else if(view.buffer===0)bytes=glbBinary;
    const offset=view.byteOffset??0;if(!bytes||!Number.isSafeInteger(offset)||offset<0||offset+view.byteLength>bytes.length)throw new Error('嵌入贴图数据范围无效。');budget.add(`view:${image.bufferView}`,bytes.subarray(offset,offset+view.byteLength),image.mimeType||'embedded');}
  }
- return {name:model.name,files:selected.map(e=>{const bytes=content.get(e.key);if(!bytes)throw new Error('素材包依赖不完整。');return {name:e.name,bytes:new Uint8Array(bytes)}}),warnings:[...new Set(warnings)]};
+ /** `.meta` files only build the guid index; the viewer never needs their bytes. */
+ return {name:model.name,files:selected.filter(e=>!prefab||!/\.meta$/i.test(e.name)).map(e=>{const bytes=content.get(e.key);if(!bytes)throw new Error('素材包依赖不完整。');return {name:e.name,bytes:new Uint8Array(bytes)}}),warnings:[...new Set(warnings)],...(prefab?{prefab}:{})};
 }
 
 function decodeData(value:string,limit:number):Buffer {

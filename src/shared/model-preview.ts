@@ -1,11 +1,17 @@
 import type {AppTheme} from './contracts';
-export const MODEL_FORMATS=['fbx','glb','gltf','obj'] as const;
+export const MODEL_FORMATS=['fbx','glb','gltf','obj','prefab'] as const;
 export type ModelFormat=typeof MODEL_FORMATS[number];
 export const MODEL_MAX_BYTES=64*1024*1024,MODEL_BUNDLE_BYTES=128*1024*1024,MODEL_TEXTURE_BYTES=16*1024*1024;
 export const MODEL_TEXTURE_DIMENSION=4096,MODEL_TEXTURE_DECODED_BYTES=128*1024*1024;
+export const MODEL_PREFAB_MAX_BYTES=8*1024*1024,MODEL_PREFAB_MAX_NODES=512,MODEL_PREFAB_MAX_MATERIALS=64,MODEL_PREFAB_MAX_MESHES=64;
 export interface ModelChoice {token:string;label:string;name:string;format:ModelFormat;size:number}
 export interface ModelPreviewState {title:string;theme:AppTheme;choices:ModelChoice[];warnings:string[]}
-export interface ModelBundle {name:string;files:{name:string;bytes:Uint8Array}[];warnings:string[]}
+export interface PrefabTransform {position:[number,number,number];rotation:[number,number,number,number];scale:[number,number,number]}
+/** A node keeps the file's own numbers; only the handedness mirror is applied at load. */
+export interface PrefabNode {id:string;name:string;parent:string|null;transform:PrefabTransform;mesh?:string;submesh:number;materials:string[]}
+export interface PrefabMaterial {file:string;name:string;color:[number,number,number];hasColor:boolean;texture?:string;transparent:boolean;cutoff:number;doubleSided:boolean}
+export interface PrefabScene {nodes:PrefabNode[];materials:PrefabMaterial[];warnings:string[]}
+export interface ModelBundle {name:string;files:{name:string;bytes:Uint8Array}[];warnings:string[];prefab?:PrefabScene}
 export interface ModelReferenceSource {id:string;title:string}
 export interface ModelReferenceState {title?:string;choices:ModelChoice[];warnings:string[]}
 export interface ModelSceneBundle {primary:ModelBundle;reference?:ModelBundle}

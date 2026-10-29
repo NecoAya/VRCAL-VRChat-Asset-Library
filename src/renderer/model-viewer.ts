@@ -8,6 +8,7 @@ import {TGALoader} from 'three/addons/loaders/TGALoader.js';
 import {DDSLoader} from 'three/addons/loaders/DDSLoader.js';
 import {modelFormat,resolveModelResource,modelMaterialResourceBase,ModelPreviewResources,type ModelBundle,type ModelSceneBundle} from '../shared/model-preview';
 import {ModelSceneLayer,applyModelTransform,checkedModelTransform,modelSceneBounds,summarizeModelScene,type ModelLayer,type ModelTransform,type ModelPart} from './model-scene';
+import {buildPrefabScene,prefabMaterial,type PrefabModel} from './prefab-scene';
 
 export type {ModelLayer,ModelTransform,ModelPart} from './model-scene';
 export interface ModelStats {meshes:number;triangles:number;animations:number;materials:number;dimensions:string;composite?:boolean}
@@ -74,14 +75,39 @@ export class ModelViewer {
    warnings.add('部分贴图缺失或引用了外部路径，已显示可用材质。');return 'data:application/octet-stream;base64,';
   });
   manager.onError=()=>{if(active()){warnings.add('部分贴图无法读取，画面可能与 Unity 不同。');this.dirty=true}};manager.onLoad=()=>{if(active()){this.dirty=true;if(warnings.size)this.warning([...warnings].join(' '))}};
-  const bytes=bundle.files.find(file=>file.name===bundle.name)?.bytes;if(!bytes)throw new Error('模型数据缺失。');const data=new Uint8Array(bytes).buffer,format=modelFormat(bundle.name);let model:THREE.Object3D;
-  if(format==='fbx'){model=resources.captureObjectURLs(()=>new FBXLoader(manager).parse(data,''));layer.clips=model.animations||[]}
-  else if(format==='glb'||format==='gltf'){
-   const loader=new GLTFLoader(manager);loader.register(parser=>{const textureLoader=parser.textureLoader;if(textureLoader instanceof THREE.ImageBitmapLoader){const load=textureLoader.load.bind(textureLoader);textureLoader.load=(url,onLoad,onProgress,onError)=>load(url,bitmap=>{resources.trackBitmap(bitmap);onLoad?.(bitmap)},onProgress,onError)}return {name:'VRCAL_resource_lifetime'}});
-   const result=await loader.parseAsync(format==='gltf'?new TextDecoder().decode(data):data,'');model=result.scene;layer.clips=result.animations;
+  const parse=async(name:string):Promise<{model:THREE.Object3D;clips:THREE.AnimationClip[]}>=>{
+   const file=bundle.files.find(item=>item.name===name);if(!file)throw new Error('模型数据缺失。');
+   const data=new Uint8Array(file.bytes).buffer,format=modelFormat(name);
+   if(format==='fbx'){const model=resources.captureObjectURLs(()=>new FBXLoader(manager).parse(data,''));return {model,clips:model.animations||[]}}
+   if(format==='glb'||format==='gltf'){
+    const loader=new GLTFLoader(manager);loader.register(parser=>{const textureLoader=parser.textureLoader;if(textureLoader instanceof THREE.ImageBitmapLoader){const load=textureLoader.load.bind(textureLoader);textureLoader.load=(url,onLoad,onProgress,onError)=>load(url,bitmap=>{resources.trackBitmap(bitmap);onLoad?.(bitmap)},onProgress,onError)}return {name:'VRCAL_resource_lifetime'}});
+    const result=await loader.parseAsync(format==='gltf'?new TextDecoder().decode(data):data,'');return {model:result.scene,clips:result.animations};
+   }
+   if(format==='obj'){const loader=new OBJLoader(manager),text=new TextDecoder().decode(data),mtl=text.match(/^mtllib\s+(.+)$/m)?.[1]?.trim(),name2=mtl?resolveModelResource(mtl,name,names):undefined,file2=bundle.files.find(file=>file.name===name2);if(file2){const materials=new MTLLoader(manager).parse(new TextDecoder().decode(file2.bytes),modelMaterialResourceBase(file2.name));materials.preload();loader.setMaterials(materials)}return {model:loader.parse(text),clips:[]}}
+   throw new Error('当前文件格式不支持轻量预览。');
+  };
+  let model:THREE.Object3D;
+  if(bundle.prefab){
+   const meshes=new Map<string,PrefabModel>();
+   for(const file of bundle.files){
+    const format=modelFormat(file.name);if(!format||file.name===bundle.name)continue;
+    const parsed=await parse(file.name);this.assertPending(layer);
+    const parts:THREE.Object3D[]=[];parsed.model.traverse(target=>{if((target as THREE.Mesh).isMesh)parts.push(target)});
+    meshes.set(file.name,{whole:parsed.model,parts});
+   }
+   const materials=new Map<string,THREE.Material>(),textureLoader=new THREE.TextureLoader(manager);
+   for(const definition of bundle.prefab.materials){
+    let texture:THREE.Texture|undefined;
+    const failed=()=>{if(active()){warnings.add('部分贴图无法读取，画面可能与 Unity 不同。');this.dirty=true}};
+    if(definition.texture)texture=textureLoader.load(definition.texture,()=>{this.dirty=true},undefined,failed);
+    materials.set(definition.file,prefabMaterial(definition,texture));
+   }
+   const assembly=buildPrefabScene(bundle.prefab,meshes,materials);this.assertPending(layer);
+   if(assembly.missing)warnings.add(`${assembly.missing} 个引用的模型不在此素材的读取范围内，画面可能不完整。`);
+   if(assembly.shared)warnings.add(`${assembly.shared} 个模型文件被多个节点共用，这些网格按出现顺序分配，与 Unity 内的对应关系可能不同。`);
+   model=assembly.root;
   }
-  else if(format==='obj'){const loader=new OBJLoader(manager),text=new TextDecoder().decode(data),mtl=text.match(/^mtllib\s+(.+)$/m)?.[1]?.trim(),name=mtl?resolveModelResource(mtl,bundle.name,names):undefined,file=bundle.files.find(file=>file.name===name);if(file){const materials=new MTLLoader(manager).parse(new TextDecoder().decode(file.bytes),modelMaterialResourceBase(file.name));materials.preload();loader.setMaterials(materials)}model=loader.parse(text)}
-  else throw new Error('当前文件格式不支持轻量预览。');
+  else{const parsed=await parse(bundle.name);this.assertPending(layer);model=parsed.model;layer.clips=parsed.clips;}
   layer.scene=new ModelSceneLayer(layer.name,model);if(layer.released){layer.scene.dispose();throw new Error(this.closed?'预览已关闭。':'预览已取消。')}this.assertPending(layer);
  }
  private releaseLayer(layer:LoadedLayer){if(layer.released)return;layer.released=true;layer.resources.dispose();layer.animation?.stopAllAction();if(layer.scene){layer.animation?.uncacheRoot(layer.scene.model);layer.scene.dispose()}}
