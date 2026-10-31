@@ -12,6 +12,10 @@ export const CONTRIBUTORS = [
   {id:'necoaya-github',label:'GitHub 主页',url:'https://github.com/NecoAya'},
   {id:'necoaya-bilibili',label:'Bilibili 主页',url:'https://space.bilibili.com/13551697'},
  ]},
+ {handle:'KelierAndes',name:'KelierAndes',initials:'K',role:'提交 Unity Prefab 轻量 3D 预览改进（PR #3，评审中）',links:[
+  {id:'kelierandes-github',label:'GitHub 主页',url:'https://github.com/KelierAndes'},
+  {id:'kelierandes-pr3',label:'PR #3',url:'https://github.com/NecoAya/VRCAL-VRChat-Asset-Library/pull/3'},
+ ]},
 ] as const satisfies readonly Contributor[];
 export function communityUrl(id:unknown):string {
  if(typeof id!=='string'||id.length>100)throw new Error('社区链接无效。');
