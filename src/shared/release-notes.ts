@@ -14,6 +14,12 @@ export interface ReleaseNote {
 // neither semver sorting nor this list determines the running/latest version.
 // This is bundled documentation and never requires a GitHub request.
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
+  {version:'1.4.1',date:'2026-11-01',channel:'stable',title:"Prefab 只读组合预览与百度下载提示",sections:[
+    {kind:'added',items:["新增 Prefab 层级、网格和近似材质预览，支持已登记目录、ZIP、Unitypackage 与 Unity 工程，也可用于角色和衣服静态组合。"]},
+    {kind:'fixed',items:["保留关闭物体的子树隐藏、静态骨骼与祖先变换；修正 GUID、长 fileID、依赖范围和组合资源预算处理。"]},
+    {kind:'improved',items:["百度下载启动统一使用 45 秒总等待上限，失败提示更具体，并可主动打开应用内下载页面查看登录或验证要求。"]},
+    {kind:'notes',items:["Prefab 仅为静态外观参考，不执行脚本，不还原 Unity 着色器、动画、MA 或物理；嵌套 Prefab 与内置几何等未显示内容会提示，不保证适配。","读取保持只读并受授权目录与资源预算限制；真实角色工程、真实账号下载及平台验证仍需分别验收，不承诺所有百度分享均可下载。","继续使用原资料库，升级前备份并退出旧版；单文件版检查最新稳定发布，解压目录版从发布页手动更新。"]},
+  ]},
   {version:'1.4.1-preview.1',date:'2026-11-01',channel:'preview',title:'百度下载启动超时与页面验证',sections:[
     {kind:'fixed',items:['百度下载启动统一使用 45 秒总等待上限，页面读取、文件定位与原生下载共用剩余时间，避免原先授权与轮询等待不一致。','文件定位、来源核对、等待到期及联网关闭时提供更具体的提示，继续拒绝来源不明或与所选文件不符的下载。']},
     {kind:'added',items:['百度下载失败后可主动点击“查看下载页面／验证”，在应用内显示当前分享页；窗口关闭后可再次打开，不自动弹窗，也不启动外部客户端。']},

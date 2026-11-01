@@ -14,15 +14,13 @@
 
 [第三方组件、资源与参考来源](THIRD_PARTY_NOTICES.md) · [运行依赖许可全文索引](licenses/README.md)
 
-**当前正式版：1.4.0。** 汇总自 1.3.0 以来的素材整理、深层扫描与同名封面、批量下载完成即入库、多个 ZIP 合并解压、素材位置多选移除，以及工程工作台与网页 AI 辅助。轻量 3D、MA 和账号页面读取继续遵守各自验证边界。[正式版说明](docs/RELEASE_1.4.0.zh-CN.md) · [素材位置操作指南](docs/SOURCE_LOCATIONS.zh-CN.md)。
-
-**诊断预览：1.4.1-preview.1。** 调整百度下载启动的统一等待上限，细分失败提示，并提供主动的“查看下载页面／验证”入口。本次用户会话全部超时的原因仍未确认，不承诺所有分享均可下载或绕过百度限制。[预览说明](docs/RELEASE_1.4.1-preview.1.zh-CN.md)。
+**当前正式版：1.4.1。** 新增只读 Prefab 层级、网格与近似材质组合预览，补充百度下载等待和验证提示。静态预览不保证适配，不还原 Unity 着色器、MA 或物理；真实账号下载仍需验收。[正式版说明](docs/RELEASE_1.4.1.zh-CN.md) · [English](docs/RELEASE_1.4.1.en.md) · [日本語](docs/RELEASE_1.4.1.ja.md)。
 
 ## 下载与开始使用
 
-**[1.4.0 正式版发布与下载入口](https://github.com/NecoAya/VRCAL-VRChat-Asset-Library/releases/tag/v1.4.0)**：选择 `VRC-Asset-Library-1.4.0-x64.exe` 可直接运行；选择 `x64-Folder.zip` 则先完整解压，再运行其中的 `VRC素材库.exe`，以后直接从该目录启动。**单文件正式版通过内置更新检查最新稳定发布（`releases/latest`）；解压目录版仍需从发布页手动下载并完整解压新版。** `Source.zip` 仅用于开发。
+**[1.4.1 正式版发布与下载入口](https://github.com/NecoAya/VRCAL-VRChat-Asset-Library/releases/tag/v1.4.1)**：选择 `VRC-Asset-Library-1.4.1-x64.exe` 可直接运行；选择 `x64-Folder.zip` 则先完整解压，再运行其中的 `VRC素材库.exe`，以后直接从该目录启动。**单文件正式版通过内置更新检查最新稳定发布（`releases/latest`）；解压目录版仍需从发布页手动下载并完整解压新版。** `Source.zip` 仅用于开发。
 
-需要复测百度下载时，可从 **[1.4.1-preview.1 诊断预览入口](https://github.com/NecoAya/VRCAL-VRChat-Asset-Library/releases/tag/v1.4.1-preview.1)** 手动下载对应程序；先退出旧窗口，再运行预览并在“更新记录”核对实际版本，继续使用原资料库。此预览不进入稳定更新通道，`releases/latest` 继续指向 1.4.0。
+1.4.1 包含此前诊断预览的百度下载改进，进入稳定更新通道；仍不承诺所有分享均可下载或绕过平台验证。历史诊断说明保留供查阅。
 
 旧版官方附件继续停止提供。 版本记录、Git 历史及其原许可保留；GitHub 根据标签提供的历史 Source code 快照仍可访问。撤下下载不等于撤销旧版授权，详见 [许可变更说明](docs/LICENSING.md)。
 
@@ -54,7 +52,7 @@
 
 ## 本次更新与更新记录
 
-**1.4.1-preview.1：百度下载启动诊断。** 页面动作与原生下载共用 45 秒启动期限，失败时明确区分超时、文件名／来源不符、请求过期与联网关闭。下载失败后可主动查看已有分享页并完成官网验证；不自动弹窗，不启动外部下载客户端。本版还将此前已核实的 KelierAndes 贡献者记录随程序提供，相关 PR 未合并。本次用户会话问题仍待复测，正式版 1.4.0 保持不变。[诊断预览说明](docs/RELEASE_1.4.1-preview.1.zh-CN.md) · [下载排查](docs/DOWNLOADS.zh-CN.md)。
+**1.4.1：Prefab 只读组合预览与百度下载提示。** 正式版纳入 Prefab 贡献及后续边界修复；保留 KelierAndes 署名。百度下载统一 45 秒启动等待、细分失败原因，并可主动查看应用内下载页面；仍不承诺真实账号或所有分享下载已修复。[正式版说明](docs/RELEASE_1.4.1.zh-CN.md)。此前诊断预览说明作为历史记录保留。
 
 **1.4.0：汇总 1.3.0 以来的素材整理、下载和工程更新。** [完整正式版说明](docs/RELEASE_1.4.0.zh-CN.md)保留各功能的使用及验证边界，preview.5–17 的原始开发记录继续收录于 CHANGELOG 和应用内历史。
 

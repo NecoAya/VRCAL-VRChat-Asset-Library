@@ -18,18 +18,19 @@ function load(relative) {
 
 test('history separates public previews, unpublished trials and stable releases in chronological order', () => {
   const {RELEASE_NOTES, filterReleaseNotes} = load('shared/release-notes.ts');
-  assert.equal(require('../package.json').version, '1.4.1-preview.1');
+  assert.equal(require('../package.json').version, '1.4.1');
   assert.equal(RELEASE_NOTES[0].version, require('../package.json').version);
-  assert.equal(RELEASE_NOTES[0].channel, 'preview');
+  assert.equal(RELEASE_NOTES[0].channel, 'stable');
   const previews=filterReleaseNotes({channel:'preview'});
-  assert(previews.some(note=>note.version===require('../package.json').version));
+  assert(previews.some(note=>note.version==='1.4.1-preview.1'));
+  assert(!previews.some(note=>note.version===require('../package.json').version));
   assert(previews.some(note=>note.version==='1.4.0-preview.17'));
   assert(!previews.some(note=>note.version==='1.4.0'));
   assert(previews.every(note=>note.channel==='preview'));
   assert(!filterReleaseNotes({channel:'local'}).some(note=>note.version===require('../package.json').version));
   const stable = filterReleaseNotes({channel:'stable',language:'zh-CN'});
-  assert.deepEqual(stable.map(entry=>entry.version), ['1.4.0','1.3.0','1.2.9','1.2.8','1.2.7','1.2.6','1.2.5','1.2.4','1.2.3','1.2.2','1.2.1','1.2.0','1.1.1','1.1.0','1.0.0']);
-  assert(!stable.some(note=>note.version===require('../package.json').version));
+  assert.deepEqual(stable.map(entry=>entry.version), ['1.4.1','1.4.0','1.3.0','1.2.9','1.2.8','1.2.7','1.2.6','1.2.5','1.2.4','1.2.3','1.2.2','1.2.1','1.2.0','1.1.1','1.1.0','1.0.0']);
+  assert(stable.some(note=>note.version===require('../package.json').version));
   assert(!stable.some(note=>note.version==='1.4.0-preview.17'));
   assert(RELEASE_NOTES.every((entry,index)=>!index || entry.date <= RELEASE_NOTES[index-1].date));
   assert.equal(new Set(RELEASE_NOTES.map(entry=>entry.version)).size, RELEASE_NOTES.length);

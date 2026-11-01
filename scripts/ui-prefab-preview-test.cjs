@@ -1,4 +1,4 @@
-const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto'),{_electron}=require('playwright'),{Store}=require('../dist/main/main/store');
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto'),{_electron,chromium}=require('playwright'),{spawn}=require('node:child_process'),net=require('node:net'),{Store}=require('../dist/main/main/store');
 const {obj,mtl,purplePng}=require('../tests/model-preview-fixtures.cjs');
 const repo=path.resolve(__dirname,'..'),run=fs.mkdtempSync(path.resolve(repo,'../ui-prefab-preview-')),root=path.join(run,'Synthetic Materials'),profile=path.join(run,'Library'),folder=path.join(root,'预制件 日本語 🧵');fs.mkdirSync(path.join(folder,'Textures'),{recursive:true});fs.mkdirSync(path.join(folder,'Materials'),{recursive:true});
 const MESH='a'.repeat(32),MAT='b'.repeat(32),TEX='c'.repeat(32),GONE='d'.repeat(32);
@@ -12,9 +12,33 @@ fs.writeFileSync(path.join(folder,'说明.txt'),'Synthetic only. Preserve this f
 const digest=()=>fs.readdirSync(folder,{recursive:true,withFileTypes:true}).filter(entry=>entry.isFile()).map(entry=>{const file=path.join(entry.parentPath,entry.name);return [path.relative(folder,file),crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex')]}).sort((a,b)=>a[0].localeCompare(b[0])),before=digest();
 const store=new Store(profile,[root]);store.saveSettings({theme:'x',language:'zh-CN',onlineEnabled:false,xThemeIntroduced:true});
 const asset=store.upsertScan({path:folder,name:path.basename(folder),kind:'folder',group:'Synthetic',size:0,mtimeMs:1,localCategory:'服装',localAvatars:[],hintUrls:[]});store.close();
+const executable=process.env.VRC_TEST_APP_EXECUTABLE;
+if(executable&&(!path.isAbsolute(executable)||!fs.existsSync(executable)))throw Error('VRC_TEST_APP_EXECUTABLE must name an existing absolute packaged executable');
 const checks=[];let app;
+const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+const purplePixels=async(page,shot)=>page.evaluate(async data=>{const img=new Image();img.src='data:image/png;base64,'+data;await img.decode();const canvas=document.createElement('canvas');canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0);const bytes=ctx.getImageData(0,0,canvas.width,canvas.height).data;let purple=0;for(let p=0;p<bytes.length;p+=4){const r=bytes[p],g=bytes[p+1],b=bytes[p+2];if(r>g+15&&b>g+20&&r>70&&b>80)purple++}return {purple,total:bytes.length/4}},shot.toString('base64'));
+
+const launch=async()=>{
+ const server=net.createServer();let port;try{await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(0,'127.0.0.1',resolve)});port=server.address().port}finally{if(server.listening)await new Promise((resolve,reject)=>server.close(error=>error?reject(error):resolve()))}
+ const child=spawn(executable,['--remote-debugging-address=127.0.0.1','--remote-debugging-port='+port],{windowsHide:true,stdio:'ignore',env:{...process.env,VRC_LIBRARY_DATA_DIR:profile,VRC_LIBRARY_ROOT:root,VRC_LIBRARY_NO_NETWORK:'1',VRC_LIBRARY_NO_AUTOSCAN:'1',VRC_LIBRARY_NO_RELAUNCH:'1',VRC_LIBRARY_TEST_HIDDEN:process.env.VRC_PACKAGE_VISIBLE?'':'1',VRC_LIBRARY_NO_EDITOR_LAUNCH:'1'}});
+ let ended=false,spawnError,browser,closing;child.once('exit',()=>ended=true);child.once('error',error=>{spawnError=error;ended=true});
+ const endpointAlive=async()=>{try{return (await fetch('http://127.0.0.1:'+port+'/json/version',{signal:AbortSignal.timeout(1500)})).ok}catch{return false}};
+ const close=()=>closing??=(async()=>{
+  const started=Date.now();if(browser?.isConnected()){const session=await browser.newBrowserCDPSession().catch(()=>null);if(session)await Promise.race([session.send('Browser.close').catch(()=>{}),sleep(3000)]);await Promise.race([browser.close().catch(()=>{}),sleep(3000)])}else if(!ended)child.kill();
+  const lifecycle={pid:child.pid,port,closedApplicationEndpoint:false,launcherExited:ended};
+  while(Date.now()-started<120000){lifecycle.closedApplicationEndpoint=!(await endpointAlive());lifecycle.launcherExited=ended;if(ended&&lifecycle.closedApplicationEndpoint)break;await sleep(100)}
+  lifecycle.durationMs=Date.now()-started;fs.writeFileSync(path.join(run,'launcher-lifecycle-'+port+'.json'),JSON.stringify(lifecycle,null,2));
+  if(!lifecycle.closedApplicationEndpoint||!ended){if(!ended)child.kill();throw Error('Owned portable instance cleanup incomplete; inspect launcher lifecycle diagnostics')}
+ })();
+ app={windows:()=>browser?browser.contexts().flatMap(c=>c.pages()):[],firstWindow:async()=>app.windows().find(p=>p.url().includes('/renderer/index.html')),close};
+ try{
+  const deadline=Date.now()+120000;let ready=false;while(Date.now()<deadline&&!ended){if(await endpointAlive()){ready=true;break}await sleep(150)}if(spawnError)throw spawnError;if(!ready)throw Error('Portable child did not start its isolated test endpoint');
+  browser=await chromium.connectOverCDP('http://127.0.0.1:'+port,{timeout:Math.max(1,deadline-Date.now())});let page;
+  while(Date.now()<deadline&&!ended){page=app.windows().find(p=>p.url().includes('/resources/app.asar/dist/renderer/index.html'));if(page)break;await sleep(100)}if(!page)throw Error('Packaged main page missing before startup deadline');page.setDefaultTimeout(25000);await page.waitForFunction(()=>!!window.library,{},{timeout:Math.max(1,deadline-Date.now())});assert.equal((await page.evaluate(()=>window.library.snapshot())).settings.dataDir,profile);return page;
+ }catch(error){try{await close()}catch(cleanupError){throw new AggregateError([error,cleanupError],'Packaged startup and cleanup failed')}throw error}
+};
 (async()=>{
- app=await _electron.launch({executablePath:require('electron'),args:[repo],env:{...process.env,VRC_LIBRARY_DATA_DIR:profile,VRC_LIBRARY_ROOT:root,VRC_LIBRARY_NO_NETWORK:'1',VRC_LIBRARY_NO_AUTOSCAN:'1','VRC_LIBRARY_NO_RELAUNCH':'1',VRC_LIBRARY_TEST_HIDDEN:'1'}});
+ if(executable)await launch();else app=await _electron.launch({executablePath:require('electron'),args:[repo],env:{...process.env,VRC_LIBRARY_DATA_DIR:profile,VRC_LIBRARY_ROOT:root,VRC_LIBRARY_NO_NETWORK:'1',VRC_LIBRARY_NO_AUTOSCAN:'1','VRC_LIBRARY_NO_RELAUNCH':'1',VRC_LIBRARY_TEST_HIDDEN:'1'}});
  const main=await app.firstWindow();await main.waitForFunction(()=>!!window.library);await main.evaluate(id=>window.library.openModelPreview(id),asset.id);
  const page=app.windows().find(p=>p.url().endsWith('/model-preview.html'));assert.ok(page,'native preview window');page.setDefaultTimeout(30000);const errors=[];page.on('pageerror',event=>errors.push(event.message));await page.bringToFront();
  const select=page.getByLabel('查看模型',{exact:true});const values=await select.locator('option').evaluateAll(rows=>rows.map(row=>row.textContent));
@@ -29,7 +53,7 @@ const checks=[];let app;
  await page.getByRole('button',{name:'复位视角'}).click();
  await page.waitForFunction(frame=>Number(document.querySelector('canvas')?.dataset.previewFrame||0)>frame,frameBefore);
  const shot=await page.locator('canvas').screenshot({path:path.join(run,'prefab-canvas.png')});
- const counts=await app.evaluate(({nativeImage},data)=>{const bytes=nativeImage.createFromBuffer(Buffer.from(data,'base64')).toBitmap();let purple=0;for(let p=0;p<bytes.length;p+=4){const b=bytes[p],g=bytes[p+1],r=bytes[p+2];if(r>g+15&&b>g+20&&r>70&&b>80)purple++}return {purple,total:bytes.length/4}},shot.toString('base64'));
+ const counts=await purplePixels(page,shot);
  assert(counts.purple>150,`the prefab must actually render the purple texture through the material: ${JSON.stringify(counts)}`);
  checks.push(`Real WebGL frame renders ${counts.purple} purple pixels from the Prefab→OBJ→MAT→PNG chain`);
  const notes=await page.locator('details[open] p').allInnerTexts();
@@ -40,7 +64,7 @@ const checks=[];let app;
  const alone=await page.locator('canvas').evaluate(node=>Number(node.dataset.previewFrame||0));await page.getByRole('button',{name:'复位视角'}).click();
  await page.waitForFunction(frame=>Number(document.querySelector('canvas')?.dataset.previewFrame||0)>frame,alone);
  const aloneShot=await page.locator('canvas').screenshot({path:path.join(run,'obj-alone-canvas.png')});
- const aloneCounts=await app.evaluate(({nativeImage},data)=>{const bytes=nativeImage.createFromBuffer(Buffer.from(data,'base64')).toBitmap();let purple=0;for(let p=0;p<bytes.length;p+=4){const b=bytes[p],g=bytes[p+1],r=bytes[p+2];if(r>g+15&&b>g+20&&r>70&&b>80)purple++}return purple},aloneShot.toString('base64'));
+ const aloneCounts=(await purplePixels(page,aloneShot)).purple;
  assert(aloneCounts>150,`opening the same model file alone must still render purple: ${aloneCounts}`);
  checks.push('Opening the same model alone also renders the purple texture; material brightness may differ');
  assert.equal(errors.length,0,errors.join('\n'));
@@ -48,6 +72,6 @@ const checks=[];let app;
  await page.close();assert.deepEqual(digest(),before);assert.equal(fs.readFileSync(path.join(folder,'说明.txt'),'utf8'),'Synthetic only. Preserve this file.');
  assert.deepEqual(fs.readdirSync(folder).filter(name=>/unpacked|extract/i.test(name)),[],'no extraction directory appears beside the source');
  checks.push('Sources stay byte-identical and nothing is extracted or written');
- fs.writeFileSync(path.join(run,'report.json'),JSON.stringify({ok:true,synthetic:true,checks,purple:counts,standalonePurple:aloneCounts,sourceHashes:before,run},null,2));
+ fs.writeFileSync(path.join(run,'report.json'),JSON.stringify({ok:true,synthetic:true,packaged:!!executable,executable,checks,purple:counts,standalonePurple:aloneCounts,sourceHashes:before,run},null,2));
  console.log(JSON.stringify({ok:true,checks,purple:counts,standalonePurple:aloneCounts,run}));
 })().catch(async error=>{console.error(error);if(app){try{const p=app.windows().find(p=>p.url().endsWith('/model-preview.html'));if(p){console.error((await p.locator('body').innerText()).slice(0,3000));await p.screenshot({path:path.join(run,'failure.png')})}}catch{}}process.exitCode=1}).finally(async()=>{if(app)await app.close()});
