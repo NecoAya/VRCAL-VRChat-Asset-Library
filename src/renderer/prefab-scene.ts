@@ -1,8 +1,29 @@
 import * as THREE from 'three';
+import {clone as cloneSkeleton} from 'three/addons/utils/SkeletonUtils.js';
 import type {PrefabScene} from '../shared/model-preview';
 
 export interface PrefabAssembly {root:THREE.Group;attached:number;missing:number;shared:number}
 export type PrefabModel={whole:THREE.Object3D;parts:THREE.Object3D[]};
+
+/** Clone complete rigs, then retain the selected mesh and all of its transform/bone ancestors. */
+function clonePrefabModel(source:THREE.Object3D,part?:THREE.Object3D):THREE.Object3D {
+ const body=cloneSkeleton(source);
+ if(!part)return body;
+ const needed=new Set<THREE.Object3D>();
+ const keepAncestors=(object:THREE.Object3D)=>{for(let current:THREE.Object3D|null=object;current;current=current.parent){needed.add(current);if(current===source)break}};
+ keepAncestors(part);
+ if((part as THREE.SkinnedMesh).isSkinnedMesh)for(const bone of (part as THREE.SkinnedMesh).skeleton.bones)keepAncestors(bone);
+ const keepPart=(original:THREE.Object3D,cloned:THREE.Object3D):THREE.Object3D=>{
+  const children=[...cloned.children];
+  // An unselected mesh can still parent the selected mesh or one of its bones.
+  // Keep its transform as a plain container, without drawing duplicate geometry.
+  const retained=(cloned as THREE.Mesh).isMesh&&original!==part?new THREE.Object3D().copy(cloned,false):cloned;
+  retained.clear();
+  for(let index=0;index<children.length;index++)if(needed.has(original.children[index]))retained.add(keepPart(original.children[index],children[index]));
+  return retained;
+ };
+ return keepPart(source,body);
+}
 
 /**
  * Assembles a Prefab scene from already parsed model files. Transforms arrive mirrored for the
@@ -12,7 +33,8 @@ export type PrefabModel={whole:THREE.Object3D;parts:THREE.Object3D[]};
  *
  * A file referenced by one node is attached whole. A file referenced by several nodes is split
  * mesh by mesh in node order, because Unity points at meshes by an internal id the viewer cannot
- * read back. Every attach clones, so the original parse result is never reparented.
+ * read back. Every attach clones the complete hierarchy and rebinds its skeletons, so the original
+ * parse result is never reparented and split meshes retain all of the file's ancestor transforms.
  */
 export function buildPrefabScene(scene:PrefabScene,meshes:Map<string,PrefabModel>,materials:Map<string,THREE.Material>):PrefabAssembly {
   const root=new THREE.Group(),groups=new Map<string,THREE.Group>(),references=new Map<string,number>();
@@ -30,9 +52,9 @@ export function buildPrefabScene(scene:PrefabScene,meshes:Map<string,PrefabModel
    const found=meshes.get(node.mesh);if(!found||(!found.whole&&!found.parts.length)){missing++;continue}
    const count=references.get(node.mesh)??1,splits=count>1&&found.parts.length>=2;
    const take=!splits?(found.whole??found.parts[0]):found.parts[Math.min(next.get(node.mesh)??0,found.parts.length-1)];
-   if(count>1&&found.parts.length!==count)sharedFiles.add(node.mesh);
+   if(count>1&&(splits||found.parts.length!==count))sharedFiles.add(node.mesh);
    if(splits)next.set(node.mesh,(next.get(node.mesh)??0)+1);
-   const source=take,body=source.clone(true);
+   const body=clonePrefabModel(splits?(found.whole??take):take,splits?take:undefined);
    const material=node.materials.map(file=>materials.get(file)).find(Boolean);
    if(material)body.traverse(target=>{if((target as THREE.Mesh).isMesh)(target as THREE.Mesh).material=material});
    group.add(body);attached++;
@@ -43,7 +65,8 @@ export function buildPrefabScene(scene:PrefabScene,meshes:Map<string,PrefabModel
 
 /** glTF/PBR names stay readable without pretending Unity's own shader ran here. */
 export function prefabMaterial(definition:{name:string;color:[number,number,number];hasColor:boolean;texture?:string;transparent:boolean;cutoff:number;doubleSided:boolean},texture:THREE.Texture|undefined):THREE.MeshStandardMaterial {
-  const material=new THREE.MeshStandardMaterial({name:definition.name.slice(0,120),roughness:.75,metalness:0,map:texture,side:definition.doubleSided?THREE.DoubleSide:THREE.FrontSide});
+  if(texture)texture.colorSpace=THREE.SRGBColorSpace;
+  const material=new THREE.MeshStandardMaterial({name:definition.name.slice(0,120),roughness:.75,metalness:0,map:texture??null,side:definition.doubleSided?THREE.DoubleSide:THREE.FrontSide});
   if(definition.hasColor)material.color.setRGB(definition.color[0],definition.color[1],definition.color[2]);
   if(definition.transparent){material.transparent=true;material.depthWrite=false;if(definition.cutoff>0&&definition.cutoff<1)material.alphaTest=definition.cutoff}
   return material;

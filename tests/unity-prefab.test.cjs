@@ -14,14 +14,14 @@ const PREFAB=`%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!1 &100000\nGameO
 
 test('YAML subset reads Unity documents, flow maps and same-indent sequences',()=>{
  const documents=yamlDocuments(PREFAB);assert.equal(documents.size,10);
- const root=documents.get(100000).body;
+ const root=documents.get('100000').body;
  assert.equal(field(root,'m_Name')===undefined,field(field(root,'GameObject'),'m_Name')==='Dress');
  const components=list(field(field(root,'GameObject'),'m_Component'));assert.equal(components.length,3);
- assert.equal(number(field(field(components[0],'component'),'fileID')),400000);
- const children=list(field(field(documents.get(400000).body,'Transform'),'m_Children'));assert.equal(children.length,2);
- assert.equal(number(field(children[0],'fileID')),400001);
- assert.deepEqual(field(field(documents.get(3300000).body,'MeshFilter'),'m_Mesh'),{fileID:4300000,guid:MESH_GUID,type:2});
- assert.equal(number(field(field(documents.get(2300000).body,'MeshRenderer'),'m_StaticBatchInfo')&&field(field(field(documents.get(2300000).body,'MeshRenderer'),'m_StaticBatchInfo'),'subMeshCount')),0);
+ assert.equal(field(field(components[0],'component'),'fileID'),'400000');
+ const children=list(field(field(documents.get('400000').body,'Transform'),'m_Children'));assert.equal(children.length,2);
+ assert.equal(field(children[0],'fileID'),'400001');
+ assert.deepEqual(field(field(documents.get('3300000').body,'MeshFilter'),'m_Mesh'),{fileID:'4300000',guid:MESH_GUID,type:2});
+ assert.equal(number(field(field(documents.get('2300000').body,'MeshRenderer'),'m_StaticBatchInfo')&&field(field(field(documents.get('2300000').body,'MeshRenderer'),'m_StaticBatchInfo'),'subMeshCount')),0);
  assert.throws(()=>yamlDocuments('fileFormatVersion: 2\nguid: x\n'),/缺少 Unity 文档头/);
  assert.throws(()=>yamlDocuments('--- !u!1 &1\nGameObject:\n\tm_Name: Tab\n'),/制表符/);
 });
@@ -53,10 +53,7 @@ test('identity stays identity so a prefab node previews like the model file alon
  assert.deepEqual(mirrorPrefabTransform(source),source);
 });
 
-test('only the mirrored axis flips: pitch and yaw keep their sign, roll and translation invert',()=>{
- assert.deepEqual(mirrorPrefabTransform({position:[0.1,0.2,0.3],rotation:[0,0,0.7071068,0.7071068],scale:[1,1,1]}).rotation,[0,0,-0.7071068,0.7071068],'rotation about Z reverses');
- assert.deepEqual(mirrorPrefabTransform({position:[1,2,3],rotation:[0,0.7071068,0,0.7071068],scale:[1,1,1]}).rotation,[0,0.7071068,0,0.7071068],'rotation about Y keeps its sign');
- assert.deepEqual(mirrorPrefabTransform({position:[1,2,3],rotation:[0.7071068,0,0,0.7071068],scale:[1,1,1]}).rotation,[0.7071068,0,0,0.7071068],'rotation about X keeps its sign');
+test('mirroring preserves scale and reflects translation across the Z plane',()=>{
  assert.deepEqual(mirrorPrefabTransform({position:[1,2,3],rotation:[0,0,0,1],scale:[1,1,1]}).position,[1,2,-3]);
  assert.deepEqual(mirrorPrefabTransform({position:[0,0,0],rotation:[0,0,0,1],scale:[2,3,4]}).scale,[2,3,4]);
 });

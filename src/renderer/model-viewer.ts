@@ -67,17 +67,20 @@ export class ModelViewer {
   const {resources,warnings}=layer,names=bundle.files.map(file=>file.name),urls=new Map<string,string>();
   const active=()=>!this.closed&&!layer.released&&(this.layers.get(layer.name)===layer||this.generation===layer.generation);
   for(const file of bundle.files){const bytes=new Uint8Array(file.bytes),url=resources.trackURL(URL.createObjectURL(new Blob([bytes],{type:mime(file.name)})));urls.set(file.name,url)}
+  const managerFor=(base:string)=>{
   const manager=new THREE.LoadingManager();manager.addHandler(/\.tga$/i,new TGALoader(manager));manager.addHandler(/\.dds$/i,new DDSLoader(manager));
   manager.setURLModifier(raw=>{
    if(raw.startsWith('blob:'))return resources.trackURL(raw);
    if(/^data:(?:image\/(?:png|jpe?g|webp|bmp)|application\/(?:octet-stream|gltf-buffer));base64,/i.test(raw))return raw;
-   const resolved=resolveModelResource(raw,bundle.name,names);if(resolved&&urls.has(resolved))return urls.get(resolved)!;
+   const resolved=resolveModelResource(raw,base,names);if(resolved&&urls.has(resolved))return urls.get(resolved)!;
    warnings.add('部分贴图缺失或引用了外部路径，已显示可用材质。');return 'data:application/octet-stream;base64,';
   });
   manager.onError=()=>{if(active()){warnings.add('部分贴图无法读取，画面可能与 Unity 不同。');this.dirty=true}};manager.onLoad=()=>{if(active()){this.dirty=true;if(warnings.size)this.warning([...warnings].join(' '))}};
+  return manager;
+  };
   const parse=async(name:string):Promise<{model:THREE.Object3D;clips:THREE.AnimationClip[]}>=>{
    const file=bundle.files.find(item=>item.name===name);if(!file)throw new Error('模型数据缺失。');
-   const data=new Uint8Array(file.bytes).buffer,format=modelFormat(name);
+   const data=new Uint8Array(file.bytes).buffer,format=modelFormat(name),manager=managerFor(name);
    if(format==='fbx'){const model=resources.captureObjectURLs(()=>new FBXLoader(manager).parse(data,''));return {model,clips:model.animations||[]}}
    if(format==='glb'||format==='gltf'){
     const loader=new GLTFLoader(manager);loader.register(parser=>{const textureLoader=parser.textureLoader;if(textureLoader instanceof THREE.ImageBitmapLoader){const load=textureLoader.load.bind(textureLoader);textureLoader.load=(url,onLoad,onProgress,onError)=>load(url,bitmap=>{resources.trackBitmap(bitmap);onLoad?.(bitmap)},onProgress,onError)}return {name:'VRCAL_resource_lifetime'}});
@@ -89,13 +92,15 @@ export class ModelViewer {
   let model:THREE.Object3D;
   if(bundle.prefab){
    const meshes=new Map<string,PrefabModel>();
-   for(const file of bundle.files){
-    const format=modelFormat(file.name);if(!format||file.name===bundle.name)continue;
-    const parsed=await parse(file.name);this.assertPending(layer);
+   const referenced=new Set(bundle.prefab.nodes.flatMap(node=>node.mesh?[node.mesh]:[]));
+   for(const name of referenced){
+    const format=modelFormat(name);if(!format||format==='prefab'||!urls.has(name))continue;
+    const parsed=await parse(name);this.assertPending(layer);
     const parts:THREE.Object3D[]=[];parsed.model.traverse(target=>{if((target as THREE.Mesh).isMesh)parts.push(target)});
-    meshes.set(file.name,{whole:parsed.model,parts});
+    meshes.set(name,{whole:parsed.model,parts});
    }
-   const materials=new Map<string,THREE.Material>(),textureLoader=new THREE.TextureLoader(manager);
+   // Material textures already carry canonical bundle paths from the GUID index.
+   const materials=new Map<string,THREE.Material>(),textureLoader=new THREE.TextureLoader(managerFor(''));
    for(const definition of bundle.prefab.materials){
     let texture:THREE.Texture|undefined;
     const failed=()=>{if(active()){warnings.add('部分贴图无法读取，画面可能与 Unity 不同。');this.dirty=true}};

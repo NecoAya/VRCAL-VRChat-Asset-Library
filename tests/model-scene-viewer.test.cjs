@@ -7,8 +7,10 @@ before(async()=>{
  class Renderer{constructor(){this.domElement={setAttribute(){},addEventListener(){},removeEventListener(){},remove(){},dataset:{}}}setClearColor(){}setPixelRatio(){}setSize(){}render(){}dispose(){}forceContextLoss(){}}
  class Controls{constructor(){this.target=new THREE.Vector3()}addEventListener(){}update(){}dispose(){}}
  replace('ResizeObserver',class{observe(){}disconnect(){}});replace('document',{hidden:false,hasFocus:()=>true,addEventListener(){},removeEventListener(){}});replace('window',{addEventListener(){},removeEventListener(){}});replace('requestAnimationFrame',()=>1);replace('cancelAnimationFrame',()=>{});replace('devicePixelRatio',1);
+ replace('ProgressEvent',class extends Event{constructor(type,options={}){super(type);Object.assign(this,options)}});
  const modules={'three':{...THREE,WebGLRenderer:Renderer},'three/addons/controls/OrbitControls.js':{OrbitControls:Controls}};
  for(const name of ['FBXLoader','GLTFLoader','OBJLoader','MTLLoader','TGALoader','DDSLoader'])modules[`three/addons/loaders/${name}.js`]=await import(`three/addons/loaders/${name}.js`);
+ modules['three/addons/utils/SkeletonUtils.js']=await import('three/addons/utils/SkeletonUtils.js');
  function compile(relative){const file=path.resolve(__dirname,'../src/renderer',relative),loaded=new Module(file,module);loaded.filename=file;loaded.paths=Module._nodeModulePaths(path.dirname(file));const require=loaded.require.bind(loaded);loaded.require=name=>/^\.\/(model-scene|prefab-scene)$/.test(name)?compile(name.slice(2)+'.ts'):name==='../shared/model-preview'?require(path.resolve(__dirname,'../dist/main/shared/model-preview')):modules[name]||require(name);loaded._compile(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,file);return loaded.exports}
  ModelViewer=compile('model-viewer.ts').ModelViewer;
 });
@@ -49,5 +51,29 @@ test('a small OBJ mesh cannot admit extra lines or points and invalid replacemen
    await assert.rejects(v.loadScene({primary:{name:'mixed.obj',files:[{name:'mixed.obj',bytes}],warnings:[]}}),/线|点|网格/);assert.equal(meshes(v).length,1);assert(meshes(v)[0].name.includes('Keep'));
    const unsupported=[];v.scene.traverse(node=>{if(node.isLine||node.isPoints||node.isSprite)unsupported.push(node)});assert.deepEqual(unsupported,baseline);
   }
+ }finally{v.dispose()}
+});
+
+test('prefab glTF models resolve equal buffer basenames relative to each referenced model',async()=>{
+ const v=viewer(),files=[];
+ for(const [folder,height] of [['A',1],['B',2]]){
+  const data=new Float32Array([0,0,0,1,0,0,0,height,0]);
+  const json={asset:{version:'2.0'},scene:0,scenes:[{nodes:[0]}],nodes:[{name:folder,mesh:0}],meshes:[{primitives:[{attributes:{POSITION:0}}]}],buffers:[{uri:'mesh.bin',byteLength:data.byteLength}],bufferViews:[{buffer:0,byteOffset:0,byteLength:data.byteLength}],accessors:[{bufferView:0,componentType:5126,count:3,type:'VEC3',min:[0,0,0],max:[1,height,0]}]};
+  files.push({name:`Models/${folder}/model.gltf`,bytes:new TextEncoder().encode(JSON.stringify(json))},{name:`Models/${folder}/mesh.bin`,bytes:new Uint8Array(data.buffer)});
+ }
+ const nodes=['A','B'].map(id=>({id,name:id,parent:null,transform:{position:[0,0,0],rotation:[0,0,0,1],scale:[1,1,1]},mesh:`Models/${id}/model.gltf`,submesh:0,materials:[]}));
+ try{
+  const stats=await v.load({name:'Prefabs/scene.prefab',files:[{name:'Prefabs/scene.prefab',bytes:new Uint8Array()},...files],warnings:[],prefab:{nodes,materials:[],warnings:[]}});
+  assert.equal(stats.triangles,2);
+  assert.deepEqual(meshes(v).map(mesh=>mesh.geometry.attributes.position.getY(2)).sort(),[1,2],'each local .bin belongs to its own model');
+ }finally{v.dispose()}
+});
+
+test('prefab loading only parses mesh references, not resources with model-like extensions',async()=>{
+ const v=viewer(),primary=bundle('OnlyMesh');
+ const nodes=[{id:'n',name:'n',parent:null,transform:{position:[0,0,0],rotation:[0,0,0,1],scale:[1,1,1]},mesh:'same.obj',submesh:0,materials:[]}];
+ try{
+  const stats=await v.load({name:'scene.prefab',files:[{name:'scene.prefab',bytes:new Uint8Array()},...primary.files,{name:'buffer.fbx',bytes:new Uint8Array([1,2,3])}],warnings:[],prefab:{nodes,materials:[],warnings:[]}});
+  assert.equal(stats.triangles,1);assert.equal(meshes(v).length,1);
  }finally{v.dispose()}
 });

@@ -6,27 +6,29 @@
  */
 export interface YamlMap {[key:string]:YamlValue|undefined}
 export type YamlValue=string|number|null|YamlValue[]|YamlMap;
-export interface YamlDocument {classId:number;fileId:number;body:Record<string,YamlValue>|undefined;binary:boolean}
+export interface YamlDocument {classId:number;fileId:string;body:Record<string,YamlValue>|undefined;binary:boolean}
 const MAX_LINES=400000,MAX_DEPTH=40,MAX_ITEMS=4000;
 const isDash=(value:string)=>value==='-'||value.startsWith('- ');
 const mapping=/^([^:]{1,160}):(.*)$/;
 
-function scalar(raw:string):string|number|null {
+function scalar(raw:string,key?:string):string|number|null {
   if(!raw||raw==='~'||raw==='null')return null;
   if(raw==='true'||raw==='yes')return 1;
   if(raw==='false'||raw==='no')return 0;
   const single=/^'([\s\S]*)'$/.exec(raw);if(single)return single[1].replace(/''/g,"'");
   const double=/^"([\s\S]*)"$/.exec(raw);if(double)return double[1].replace(/\\(["\\])/g,'$1');
+  // Unity IDs are identifiers, including signed 64-bit fileIDs and all-digit GUIDs.
+  if(key==='fileID'||key==='guid')return raw;
   if(/^[+-]?(?:\d+\.?\d*(?:[eE][+-]?\d+)?|0x[0-9a-fA-F]+)$/.test(raw))return Number(raw);
   return raw;
 }
 
 /** `{x: 1, y: -2}` and `[a, b]` never nest deeply enough to need a real grammar. */
-function flow(raw:string,depth=0):YamlValue|null|undefined {
+function flow(raw:string,depth=0,key?:string):YamlValue|null|undefined {
   if(depth>8||!raw)return undefined;
-  if(raw.startsWith('{')&&raw.endsWith('}')){const out:Record<string,YamlValue>={},inner=raw.slice(1,-1).trim();if(!inner)return out;for(const part of splitTop(inner)){const at=part.indexOf(':');if(at<0)return;out[part.slice(0,at).trim()]=part.slice(at+1).trim()?flow(part.slice(at+1).trim(),depth+1)??null:null;}return out;}
+  if(raw.startsWith('{')&&raw.endsWith('}')){const out:Record<string,YamlValue>={},inner=raw.slice(1,-1).trim();if(!inner)return out;for(const part of splitTop(inner)){const at=part.indexOf(':');if(at<0)return;const childKey=part.slice(0,at).trim();out[childKey]=part.slice(at+1).trim()?flow(part.slice(at+1).trim(),depth+1,childKey)??null:null;}return out;}
   if(raw.startsWith('[')&&raw.endsWith(']')){const out:YamlValue[]=[],inner=raw.slice(1,-1).trim();if(inner)for(const part of splitTop(inner))out.push(flow(part.trim(),depth+1)??null);return out;}
-  return scalar(raw);
+  return scalar(raw,key);
 }
 
 /** Commas separate entries; a space inside `key: value` has to stay with its pair. */
@@ -60,7 +62,7 @@ function readPair(target:Record<string,YamlValue|undefined>,key:string,rest:stri
   if(depth>MAX_DEPTH)throw new Error('YAML 嵌套超过轻量预览上限。');
   if(rest){
     if(rest==='|'||rest==='|-'||rest==='>'||rest==='>-'){const chunk:string[]=[];let cursor=next;while(cursor<rows.length&&rows[cursor].indent>=indent)chunk.push(rows[cursor++].text);target[key]=chunk.join(' ');return cursor;}
-    target[key]=flow(rest,depth+1)??null;return next;
+    target[key]=flow(rest,depth+1,key)??null;return next;
   }
   const line=rows[next];
   if(line&&line.indent>indent){const [value,after]=parseNode(rows,next,line.indent,depth+1);target[key]=value;return after;}
@@ -110,8 +112,8 @@ function parseMapping(rows:Line[],start:number,indent:number,depth:number):[Reco
 }
 
 /** Unity separates documents with `--- !u!<classId> &<fileId>`. */
-export function yamlDocuments(source:string):Map<number,YamlDocument>{
-  const found=new Map<number,YamlDocument>();let current:{classId:number;fileId:number;body:string[]}|undefined,binary=false;
+export function yamlDocuments(source:string):Map<string,YamlDocument>{
+  const found=new Map<string,YamlDocument>();let current:{classId:number;fileId:string;body:string[]}|undefined,binary=false;
   const flush=()=>{
     if(!current)return;
     let body:Record<string,YamlValue>|undefined;
@@ -120,8 +122,8 @@ export function yamlDocuments(source:string):Map<number,YamlDocument>{
     current=undefined;binary=false;
   };
   for(const raw of source.split(/\r?\n/)){
-    const header=/^---\s*!u!(\d{1,6})\s*&(\d{1,15})(?:\s+|$)/.exec(raw.trim());
-    if(header){flush();current={classId:Number(header[1]),fileId:Number(header[2]),body:[]};continue}
+    const header=/^---\s*!u!(\d{1,6})\s*&(-?\d{1,19})(?:\s+|$)/.exec(raw.trim());
+    if(header){flush();current={classId:Number(header[1]),fileId:header[2],body:[]};continue}
     if(/^\.(?:doc|end)$/.test(raw.trim())){flush();continue}
     if(!current){if(!raw.trim()||raw.trimStart().startsWith('%'))continue;throw new Error('文件缺少 Unity 文档头。');}
     if(raw.includes('!!binary'))binary=true;
