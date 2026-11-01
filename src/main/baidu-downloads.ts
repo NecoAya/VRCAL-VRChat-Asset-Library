@@ -1,4 +1,4 @@
-import {WebContentsView,type Session,type WebContents,type DownloadItem,type Event} from 'electron';
+import {BrowserWindow,WebContentsView,type Session,type WebContents,type DownloadItem,type Event} from 'electron';
 import fs from 'node:fs';
 import path from 'node:path';
 import {randomUUID} from 'node:crypto';
@@ -10,13 +10,16 @@ import {DownloadFolders,downloadFamily} from './download-folders';
 import {DownloadExtractionJobs,type ExtractionSource} from './download-extraction-jobs';
 import {supportsDownloadExtraction} from './download-extract';
 
-interface Deps {dataDir:string;roots:()=>string[];session:()=>Promise<Session>;canNetwork:()=>boolean;changed:()=>void;onDownloaded?:(file:string)=>Promise<{assetId:string}>;onTaskStarted?:(id:string)=>void;canProcess?:()=>boolean;onExtracted?:(directory:string)=>Promise<{assetId:string}>;trash?:(file:string)=>Promise<void>;onRecycled?:(source:ExtractionSource)=>void}
+interface Deps {dataDir:string;roots:()=>string[];session:()=>Promise<Session>;canNetwork:()=>boolean;changed:()=>void;parent?:()=>BrowserWindow|null;onDownloaded?:(file:string)=>Promise<{assetId:string}>;onTaskStarted?:(id:string)=>void;canProcess?:()=>boolean;onExtracted?:(directory:string)=>Promise<{assetId:string}>;trash?:(file:string)=>Promise<void>;onRecycled?:(source:ExtractionSource)=>void}
 interface FileIdentity {device:string;inode:string;birthtime:string;modified:string;size:string}
 interface StoredTask extends BaiduDownloadTask {folder:string;fileIdentity?:FileIdentity}
 interface ShareFile extends BaiduShareFile {index:number}
 interface Batch {files:ShareFile[];account?:string;serial:number;options:DownloadExtractionOptions;completed:StoredTask[]}
 interface Pending {file:ShareFile;account:string;id:string;folder:string;expires:number;finish:(task:StoredTask)=>void;failure?:string;autoExtract:boolean}
 const states=['downloading','paused','completed','interrupted','cancelled'];
+// One deadline covers the page actions and native download event; polling never renews it.
+const DOWNLOAD_START_TIMEOUT_MS=45000;
+const DOWNLOAD_START_TIMEOUT='百度网页下载启动超时。请检查登录／安全验证；若百度要求客户端，该文件暂无法在应用内下载。';
 const uuidPattern='[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}';
 const identityKeys=['device','inode','birthtime','modified','size'] as const;
 function fileIdentity(file:string):FileIdentity {
@@ -32,6 +35,7 @@ export function baiduDownloadName(name:unknown):string {
 }
 export function baiduDownloadUrl(value:string):boolean {try{const u=new URL(value);return u.protocol==='https:'&&!u.username&&!u.password&&!u.port&&/(?:^|\.)(?:baidu\.com|baidupcs\.com|bcebos\.com)$/.test(u.hostname)}catch{return false}}
 export class BaiduDownloads {
+ private verificationWindow?:BrowserWindow;
  private view?:WebContentsView;private remote?:Session;private phase:BaiduDownloadState['phase']='idle';private message='';private title='';private files:ShareFile[]=[];private directory?:string;private pagePath='';private back=false;private busy=false;private serial=0;private lastStop=Promise.resolve();private loggedIn=false;private rejectedAccount?:string;
  private tasks:StoredTask[]=[];private active=new Map<string,DownloadItem>();private pending?:Pending;private source='';private batch?:Batch;private batchRun?:Promise<void>;private imports=new Map<string,Promise<void>>();private folders:DownloadFolders;private extraction:DownloadExtractionJobs;private options:DownloadExtractionOptions={autoExtract:false,recycleArchives:false};
  constructor(private readonly deps:Deps){this.folders=new DownloadFolders(deps.dataDir,deps.roots);this.load();this.extraction=new DownloadExtractionJobs({dataDir:deps.dataDir,roots:deps.roots,available:()=>deps.canProcess?.()??true,changed:deps.changed,register:async directory=>{if(!deps.onExtracted)throw new Error('解压结果入库暂不可用。');return deps.onExtracted(directory)},trash:deps.trash,onRecycled:source=>{const task=this.tasks.find(row=>row.id===source.id);if(task){task.archived=true;this.save()}deps.onRecycled?.(source);deps.changed()}})}
@@ -44,6 +48,19 @@ export class BaiduDownloads {
  private async requireLogin(){await this.refreshState();if(!this.loggedIn)throw new Error('请先在应用内登录百度账号，再读取分享。')}
  setDirectory(directory:string):void {if(this.working())throw new Error('请等待下载及入库结束后更改保存位置。');const target=assertSafeWrite(directory,this.deps.dataDir,[...this.deps.roots(),this.deps.dataDir],true);const stat=fs.lstatSync(target);if(!stat.isDirectory()||stat.isSymbolicLink())throw new Error('请选择普通下载文件夹。');this.directory=target;this.save();this.deps.changed()}
  private requireNetwork(){if(!this.deps.canNetwork())throw new Error('请先开启联网。')}
+ /** Only an explicit local action displays the existing share page, including its current dialog. */
+ openVerification():boolean {
+  this.requireNetwork();const view=this.view;if(!view||view.webContents.isDestroyed())return false;
+  try{baiduBrowserUrl(view.webContents.getURL())}catch{throw new Error('下载页面尚未就绪，请重新读取分享。')}
+  if(this.verificationWindow&&!this.verificationWindow.isDestroyed()){if(!process.env.VRC_LIBRARY_TEST_HIDDEN){this.verificationWindow.show();this.verificationWindow.focus()}return true}
+  const window=new BrowserWindow({width:1100,height:820,minWidth:800,minHeight:600,show:false,parent:this.deps.parent?.()??undefined,title:'百度网盘 · 当前下载页面／验证（关闭后回应用重试）',backgroundColor:'#16181c',autoHideMenuBar:true,webPreferences:{contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true,webviewTag:false}});
+  this.verificationWindow=window;window.contentView.addChildView(view);
+  const layout=()=>{if(!window.isDestroyed()&&!view.webContents.isDestroyed()){const [width,height]=window.getContentSize();view.setBounds({x:0,y:0,width,height})}};
+  window.on('resize',layout);layout();
+  window.once('closed',()=>{try{window.contentView.removeChildView(view)}catch{}if(!view.webContents.isDestroyed())view.setBounds({x:0,y:0,width:1280,height:900});if(this.verificationWindow===window)this.verificationWindow=undefined});
+  if(!process.env.VRC_LIBRARY_TEST_HIDDEN){window.show();window.focus()}return true;
+ }
+ private closeVerification(){const window=this.verificationWindow;this.verificationWindow=undefined;if(window&&!window.isDestroyed()){if(this.view)try{window.contentView.removeChildView(this.view)}catch{}window.destroy()}}
  allowNavigation(contentsId:number,url:string):boolean{return !!this.view&&this.view.webContents.id===contentsId&&!!this.pending&&Date.now()<this.pending.expires&&baiduDownloadUrl(url)}
  private requireIdle(){if(this.working())throw new Error('请等待当前读取、下载或入库完成。')}
  async read(text:unknown,code?:unknown):Promise<void>{const share=parseBaiduShare(text,code);this.requireNetwork();this.requireIdle();await this.run(async()=>{await this.requireLogin();await this.createView();this.source=share.url;await this.view!.webContents.loadURL(share.url+(share.code?'?pwd='+encodeURIComponent(share.code):''));await this.capture()})}
@@ -51,7 +68,7 @@ export class BaiduDownloads {
  async parent():Promise<void>{this.requireNetwork();this.requireIdle();if(!this.back)throw new Error('已经是分享根目录。');await this.run(async()=>{await this.assertPage();await this.evaluate(BAIDU_SHARE_BACK);await this.capture(this.pagePath)})}
  private async run(action:()=>Promise<void>){const serial=this.serial;this.busy=true;this.phase='loading';this.message='';this.deps.changed();try{await action();if(serial!==this.serial)throw new Error();this.phase='ready'}catch{this.phase='error';this.files=[];this.message='分享读取失败：请检查链接、提取码、网络，或完成百度登录与验证。';throw new Error(this.message)}finally{this.busy=false;this.deps.changed()}}
  private async createView(){if(this.phase!=='loading')throw new Error('读取已取消。');const serial=this.serial;if(this.view&&!this.view.webContents.isDestroyed())return;this.remote=await this.deps.session();if(serial!==this.serial)throw new Error('读取已取消。');this.view=new WebContentsView({webPreferences:{session:this.remote,contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true,webviewTag:false}});const wc=this.view.webContents;this.view.setBounds({x:0,y:0,width:1280,height:900});wc.setWindowOpenHandler(()=>({action:'deny'}));wc.on('will-attach-webview',e=>e.preventDefault());wc.on('will-frame-navigate',e=>{try{baiduBrowserUrl(e.url)}catch{if(!this.allowNavigation(wc.id,e.url))e.preventDefault()}});wc.on('will-redirect',e=>{try{baiduBrowserUrl(e.url)}catch{if(!this.allowNavigation(wc.id,e.url))e.preventDefault()}});wc.on('will-navigate',e=>{try{baiduBrowserUrl(e.url)}catch{if(!this.allowNavigation(wc.id,e.url))e.preventDefault()}});wc.on('render-process-gone',()=>this.stop());}
- private async evaluate(script:string):Promise<any>{this.requireNetwork();if(!this.view||this.view.webContents.isDestroyed())throw new Error('分享页面未就绪。');let timer:ReturnType<typeof setTimeout>|undefined;try{return await Promise.race([this.view.webContents.executeJavaScript(script,true),new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('页面操作超时。')),10000)})])}finally{if(timer)clearTimeout(timer)}}
+ private async evaluate(script:string,deadline?:number):Promise<any>{this.requireNetwork();if(!this.view||this.view.webContents.isDestroyed())throw new Error('分享页面未就绪。');const timeout=Math.min(10000,deadline===undefined?10000:deadline-Date.now());if(timeout<=0)throw new Error(DOWNLOAD_START_TIMEOUT);let timer:ReturnType<typeof setTimeout>|undefined;try{return await Promise.race([this.view.webContents.executeJavaScript(script,true),new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error(deadline!==undefined&&Date.now()>=deadline?DOWNLOAD_START_TIMEOUT:'页面操作超时。')),timeout)})])}finally{if(timer)clearTimeout(timer)}}
  private async assertPage(){if(!this.view||this.view.webContents.isDestroyed()||new URL(this.view.webContents.getURL()).origin+new URL(this.view.webContents.getURL()).pathname!==this.source)throw new Error('分享页面已变化，请重新读取。');const state=await this.evaluate(BAIDU_SHARE_SNAPSHOT);if(state.path!==this.pagePath)throw new Error('文件列表已变化，请重新读取。')}
  private async capture(previous?:string){const serial=this.serial;for(let attempt=0;attempt<35;attempt++){if(serial!==this.serial)throw new Error('读取已取消。');const data=await this.evaluate(BAIDU_SHARE_SNAPSHOT);if(serial!==this.serial)throw new Error('读取已取消。');if(data.files?.length&&(!previous||data.path!==previous)){if(data.files.length>=1000)throw new Error('此目录文件过多，请在较小的子目录读取。');this.files=data.files.map((f:any)=>{if(typeof f.name!=='string'||!f.name||f.name.length>500||typeof f.directory!=='boolean'||!Number.isInteger(f.index))throw new Error('文件列表无效。');return {id:randomUUID(),index:f.index,name:f.name,directory:f.directory,sizeText:String(f.sizeText).slice(0,80)}});this.pagePath=data.path;this.title=String(data.title).slice(0,500);this.back=data.back===true;return}if(/分享的文件已经被取消|分享已失效|链接不存在/.test(data.text))throw new Error('分享已失效。');await new Promise(resolve=>setTimeout(resolve,600))}throw new Error('文件列表无法读取，请登录或完成验证。')}
  async download(id:string):Promise<void>{return this.downloadMany([id])}
@@ -86,19 +103,19 @@ export class BaiduDownloads {
    if(serial!==this.serial)throw new Error('登录状态已变化，请重新读取分享。');this.requireNetwork();
    const taskId=randomUUID(),family=downloadFamily(file.name),{folder}=this.folders.reserve(this.directory!,'baidu',this.source+'|'+family,family,file.name);
    let finish!:(task:StoredTask)=>void;const finished=new Promise<StoredTask>(resolve=>finish=resolve);
-   const pending:Pending={id:taskId,file,account,folder,expires:Date.now()+20000,finish,autoExtract:batch.options.autoExtract&&supportsDownloadExtraction(file.name)};this.pending=pending;
-   await this.evaluate(baiduShareAction(file.index,file.name,'download'));
+   const pending:Pending={id:taskId,file,account,folder,expires:Date.now()+DOWNLOAD_START_TIMEOUT_MS,finish,autoExtract:batch.options.autoExtract&&supportsDownloadExtraction(file.name)};this.pending=pending;
+   await this.evaluate(baiduShareAction(file.index,file.name,'download'),pending.expires);
    let ordinaryClicked=false;
-   for(let i=0;i<40&&this.pending?.id===taskId&&serial===this.serial;i++){
-    await new Promise(resolve=>setTimeout(resolve,500));if(!this.pending||serial!==this.serial)break;
-    if(!ordinaryClicked){const result=await this.evaluate(baiduNormalDownload(file.name));
+   while(this.pending?.id===taskId&&serial===this.serial&&Date.now()<pending.expires){
+    this.requireNetwork();await new Promise(resolve=>setTimeout(resolve,Math.min(500,pending.expires-Date.now())));if(!this.pending||serial!==this.serial||Date.now()>=pending.expires)break;this.requireNetwork();
+    if(!ordinaryClicked){const result=await this.evaluate(baiduNormalDownload(file.name),pending.expires);
      if(result==='login'){this.rejectedAccount=account;this.loggedIn=false;throw new Error('登录已失效，请重新登录百度账号。')}
      if(result==='mismatch'||result==='unsupported')throw new Error('百度下载页面已变化，未启动下载。');ordinaryClicked=result==='clicked';
     }
    }
    if(serial!==this.serial)throw new Error('登录状态或网络已变化，下载已取消。');
    if(pending.failure)throw new Error(pending.failure);
-   if(this.pending?.id===taskId){this.pending=undefined;throw new Error('百度未开始网页下载。请检查登录／安全验证；若百度要求客户端，该文件暂无法在应用内下载。')}
+   if(this.pending?.id===taskId){this.pending=undefined;throw new Error(DOWNLOAD_START_TIMEOUT)}
    return {finished};
   }catch(error){this.pending=undefined;this.message=error instanceof Error?error.message:'下载请求失败。';throw error}
   finally{this.busy=false;this.deps.changed()}
@@ -107,7 +124,9 @@ export class BaiduDownloads {
  accept(event:Event,item:DownloadItem,contents?:WebContents):boolean {
   if(contents!==this.view?.webContents)return false;const pending=this.pending;
   // Only the download expressly armed by the local file-list button can write.
-  if(!pending||Date.now()>pending.expires||!this.deps.canNetwork()||item.getFilename()!==pending.file.name||!item.getURLChain().length||!item.getURLChain().every(baiduDownloadUrl)){event.preventDefault();return true}
+  if(!pending){event.preventDefault();return true}
+  const rejection=Date.now()>=pending.expires?'下载请求已过期，请重新点击下载。':!this.deps.canNetwork()?'联网已关闭，下载已取消。':item.getFilename()!==pending.file.name?'百度返回的下载文件名与所选文件不一致，已停止下载。':!item.getURLChain().length||!item.getURLChain().every(baiduDownloadUrl)?'百度返回了未获允许的下载来源，已停止下载。':undefined;
+  if(rejection){event.preventDefault();pending.failure=rejection;this.pending=undefined;this.message=rejection;this.deps.changed();return true}
   this.pending=undefined;try{
    const target=this.taskPath(pending.folder,pending.id,pending.file.name),partial=assertSafeWrite(target+'.part',this.deps.dataDir,[...this.deps.roots(),this.deps.dataDir],true);if(fs.existsSync(target)||fs.existsSync(partial))throw new Error('目标文件已存在。');item.setSavePath(partial);
    const record:StoredTask={id:pending.id,name:pending.file.name,folder:pending.folder,state:'downloading',receivedBytes:0,totalBytes:item.getTotalBytes(),downloadBps:0,startedAt:new Date().toISOString()};this.tasks.unshift(record);this.tasks=this.tasks.slice(0,200);this.active.set(record.id,item);this.message='';try{this.deps.onTaskStarted?.(record.id)}catch{}this.save();this.deps.changed();let lastBytes=0,lastAt=Date.now(),lastNotify=0;
@@ -145,7 +164,7 @@ export class BaiduDownloads {
   this.serial++;this.loggedIn=false;if(this.batch)this.batch.files=[];this.pending=undefined;this.files=[];this.back=false;this.pagePath='';this.phase='idle';this.message='';
   const waiting=[...this.active.values()].map(item=>new Promise<void>(resolve=>{item.once('done',()=>resolve());item.cancel()}));
   this.lastStop=Promise.all([this.lastStop,...waiting,...this.imports.values(),this.batchRun]).then(()=>{});
-  const view=this.view;this.view=undefined;if(view&&!view.webContents.isDestroyed())view.webContents.close();this.save();this.deps.changed();
+  this.closeVerification();const view=this.view;this.view=undefined;if(view&&!view.webContents.isDestroyed())view.webContents.close();this.save();this.deps.changed();
  }
  async shutdown(){this.stop();await this.extraction.shutdown();await this.lastStop}
 

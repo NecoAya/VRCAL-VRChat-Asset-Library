@@ -14,6 +14,12 @@ export interface ReleaseNote {
 // neither semver sorting nor this list determines the running/latest version.
 // This is bundled documentation and never requires a GitHub request.
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
+  {version:'1.4.1-preview.1',date:'2026-11-01',channel:'preview',title:'百度下载启动超时与页面验证',sections:[
+    {kind:'fixed',items:['百度下载启动统一使用 45 秒总等待上限，页面读取、文件定位与原生下载共用剩余时间，避免原先授权与轮询等待不一致。','文件定位、来源核对、等待到期及联网关闭时提供更具体的提示，继续拒绝来源不明或与所选文件不符的下载。']},
+    {kind:'added',items:['百度下载失败后可主动点击“查看下载页面／验证”，在应用内显示当前分享页；窗口关闭后可再次打开，不自动弹窗，也不启动外部客户端。']},
+    {kind:'improved',items:['本次程序包补入已核实的 KelierAndes 贡献者记录；署名不代表相关 PR 已合并。']},
+    {kind:'notes',items:['本版为诊断公开预览，需手动下载，不进入稳定自动更新；最新正式版继续为 1.4.0。新增说明暂为中文。','隔离验证发现等待上限不一致；旧版实测也曾收到目标下载响应。本次用户会话全部超时的原因仍未确认，不承诺所有分享均可下载或绕过百度验证。']}
+  ]},
   {version:'1.4.0',date:'2026-10-28',channel:'stable',title:'素材整理、批量下载与工程工作台',sections:[
     {kind:'added',items:['素材位置支持多选、全选和批量移除登记；磁盘文件与已有标注保留，重新添加原位置后可恢复使用。','百度分享支持勾选下载，完成后局部入库；同商品归组，历史多个 ZIP 可合并解压到新目录，每个包使用独立子目录。','改模工作台集中工程、依赖、商品、导入与报错；可直接拖入外部 Unity 工程，30 项公开插件提供官方来源和安装入口。','新增轻量 3D 与角色衣服组合预览；网页 AI 可在应用内打开千问、Kimi、DeepSeek 官网，正常发送后衔接真实商品搜索。']},
     {kind:'improved',items:['深层目录扫描和素材文件列表不再因固定层数漏读；同目录精确同名本地图片可作包封面，配对图片减少重复卡片。','明确 BOOTH 下载来源直接关联商品、作者、分类与封面；人工来源、跳过和排除优先，来源冲突继续待确认。','延后加载网页解析器并跳过无云端内容时的全库关联；补齐运行依赖许可全文，新增解压目录运行包。']},

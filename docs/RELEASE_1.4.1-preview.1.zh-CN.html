@@ -1,0 +1,37 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>1.4.1-preview.1：百度下载启动超时与页面验证</title><style>
+ :root{color-scheme:light;--ink:#18262c;--muted:#596b74;--line:#d9e2e7;--accent:#056894}*{box-sizing:border-box}body{margin:0;background:#f3f6f8;color:var(--ink);font:16px/1.85 "Segoe UI","Microsoft YaHei",sans-serif}header{padding:28px 5vw;background:#12232c;color:#fff;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}header span{color:#a7d4e6;font-size:14px}.layout{max-width:1360px;margin:36px auto;display:grid;grid-template-columns:230px minmax(0,1fr);gap:28px;padding:0 26px}nav{position:sticky;top:24px;align-self:start;max-height:calc(100vh - 48px);overflow:auto;font-size:13px}nav a{display:block;color:var(--muted);text-decoration:none;padding:7px 12px;border-left:2px solid var(--line)}nav a:hover{color:var(--accent);border-color:var(--accent)}main{background:#fff;border:1px solid var(--line);border-radius:16px;padding:40px;min-width:0}h1{font-size:30px;line-height:1.45;margin:0 0 20px}h2{font-size:23px;margin-top:44px;padding-top:20px;border-top:1px solid var(--line)}h3{font-size:18px;margin-top:30px}a{color:var(--accent);text-underline-offset:3px}p{margin:16px 0}li{margin:8px 0}.table-scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;margin:18px 0;font-size:14px;line-height:1.7}th,td{border:1px solid var(--line);padding:11px 13px;text-align:left;vertical-align:top}th{background:#eaf3f7}tr:nth-child(even) td{background:#f8fafb}code{font-size:.91em;background:#edf2f5;border-radius:4px;padding:2px 5px;overflow-wrap:anywhere}figure{margin:24px 0}img{display:block;max-width:100%;height:auto;border-radius:10px;border:1px solid var(--line)}figcaption{font-size:13px;color:var(--muted);text-align:center;margin:8px 0}footer{font-size:13px;color:var(--muted);margin-top:40px;border-top:1px solid var(--line);padding-top:18px}@media(max-width:850px){.layout{display:block;padding:0 12px;margin:16px auto}nav{position:static;max-height:none;margin:0 0 18px;display:flex;flex-wrap:wrap}nav a{padding:5px 10px}main{padding:22px}h1{font-size:25px}}@media print{body{background:white;font-size:11pt}header,nav{display:none}.layout{display:block;margin:0;padding:0}main{padding:0;border:0}h2,h3{break-after:avoid}tr,figure{break-inside:avoid}a{color:inherit}}
+ </style><header><strong>VRCAL · 使用说明</strong><span>1.4.1-preview.1 · 诊断预览说明</span></header><div class="layout"><nav aria-label="目录"><a href="#section-2">本次处理什么</a><a href="#section-3">下载启动共用一个 45 秒期限</a><a href="#section-4">主动查看下载页面或完成验证</a><a href="#section-5">建议怎样复测</a><a href="#section-6">贡献者记录</a><a href="#section-7">验证边界</a><a href="#section-8">下载与更新通道</a></nav><main><h1 id="section-1">1.4.1-preview.1：百度下载启动超时与页面验证</h1>
+<p>日期：2026-11-01。诊断公开预览，需手动下载，不进入稳定自动更新通道；最新正式版继续为 1.4.0。新增说明暂为中文，其他 1.4.0 功能及使用边界继续沿用。</p>
+<h2 id="section-2">本次处理什么</h2>
+<p>针对“网盘首页已经登录，但应用中的百度下载仍超时”的反馈，本版修正已确认的下载启动等待机制不一致，并提供主动查看分享页的入口，以便看清百度官网是否要求验证或客户端。</p>
+<p><strong>当前用户会话全部下载超时的原因仍未确认。</strong> 调整等待方式及补充诊断，不等于已经证明所有分享恢复下载；本版不绕过百度登录、安全验证、网页权限或客户端要求。</p>
+<h2 id="section-3">下载启动共用一个 45 秒期限</h2>
+<p>此前原生下载授权在 20 秒后到期，网页触发部分则按多轮轮询等待，页面操作本身的时间未纳入同一个上限。慢页面可能在网页流程仍等待时失去本次授权，最终只留下笼统的超时提示。</p>
+<p>现在页面读取、文件定位与等待原生下载事件共用一个 <strong>45 秒总期限</strong>，每步只使用剩余时间，轮询不重新延长期限。到期会结束本次启动等待；收到有效原生下载后，后续文件传输继续按下载进度处理，45 秒不是整个文件的传输时限。</p>
+<p>返回文件名与所选文件不符、来源不在允许范围、请求已过期、联网已关闭、文件定位失败或启动超时会给出更具体的提示。原有的官方来源、文件名、保存路径和防覆盖检查继续执行，不为了减少报错而放宽检查。</p>
+<h2 id="section-4">主动查看下载页面或完成验证</h2>
+<p>百度下载失败后，可点击 <strong>查看下载页面／验证</strong>。程序在应用内显示本次使用的已有分享页面，用户可直接查看官网提示，并在官网要求时正常完成登录、提取码或安全验证。</p>
+<ul>
+<li>只有主动点击入口才显示页面，失败不会自动弹出新窗口。</li>
+<li>关闭窗口会收起页面，再次点击可复用当前页面；停止该分享流程时释放页面。</li>
+<li>继续使用隔离且受限的应用内官网页面，不赋予远程网页桌面接口。</li>
+<li>不启动外部浏览器、IDM 或百度客户端，不修改浏览器、系统关联或下载工具的全局设置。</li>
+</ul>
+<p>完成官网操作后，回到应用重新读取分享文件列表，再选择文件下载。网盘首页登录成功不代表分享页已经通过所有要求；如果官网要求客户端下载，该文件仍可能无法在应用内完成下载。</p>
+<h2 id="section-5">建议怎样复测</h2>
+<ol>
+<li>正常退出旧版，运行 <code>1.4.1-preview.1</code>，在 <strong>更新记录</strong> 核对当前版本；继续使用原资料库，不删除或重建资料库。</li>
+<li>在百度下载页读取分享，先勾选一个目标文件并开始下载，留意失败发生在读取列表、启动下载还是传输阶段。</li>
+<li>如果启动失败，记录完整错误文字和等待时间，主动打开 <strong>查看下载页面／验证</strong> 检查官网提示。</li>
+<li>完成必要的官网验证后重新读取列表再试。若仍失败，反馈当前版本、步骤、错误文字及下载页提示；分享前遮住账号、分享链接、提取码与私人文件名。</li>
+</ol>
+<p>无需为了复测全局扫描、重新确认商品或移动现有素材。保留完成记录和已下载文件，按上述步骤核对实际失败阶段即可。</p>
+<h2 id="section-6">贡献者记录</h2>
+<p>本次程序包包含此前已经核实的 <strong>KelierAndes</strong> 贡献者记录。贡献者署名与合并状态分别记录；相关 PR 仍为请求修改，未合并，不把本次打包署名描述为该 PR 的功能已经合入。</p>
+<h2 id="section-7">验证边界</h2>
+<p>隔离测试确认旧的启动授权和等待上限不一致。此前在隔离授权会话中的旧版实测曾完成一个小文件；另一个待查目标也曾收到原生下载响应，随后被主动取消。这些观察只反映当时的隔离会话，不反驳当前用户的超时报告，不证明受影响会话已经恢复，也不代表取消的文件完成了下载或入库。</p>
+<p>本次新增行为的回归、实际界面、成品版本和封包检查以同版验收记录为准，本文不预填最终测试数量或发布成功状态。账号、分享权限、网页改版、验证与客户端要求继续由百度决定，完整下载结果以用户复测为准。</p>
+<h2 id="section-8">下载与更新通道</h2>
+<p><a href="https://github.com/NecoAya/VRCAL-VRChat-Asset-Library/releases/tag/v1.4.1-preview.1">1.4.1-preview.1 诊断预览入口</a>。选择对应 EXE 运行，或完整解压 Folder ZIP 后运行其中的程序；源码 ZIP 用于开发。</p>
+<p>此版本按公开预览发布（<code>prerelease: true</code>、<code>make_latest: false</code>），不会替换稳定更新接口的 1.4.0。单文件正式版继续检查最新稳定发布，解压目录版仍手动更新；试用诊断预览需从版本专属页面手动下载。</p>
+<p><a href="DOWNLOADS.zh-CN.html">下载操作与排查</a> · <a href="RELEASE_1.4.0.zh-CN.md">1.4.0 正式版说明</a> · <a href="../CHANGELOG.md">完整版本记录</a></p><footer>离线诊断说明，无统计脚本。功能与验证边界详见正文。</footer></main></div></html>

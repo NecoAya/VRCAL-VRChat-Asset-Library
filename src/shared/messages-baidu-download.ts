@@ -165,6 +165,34 @@ export const BAIDU_DOWNLOAD_MESSAGES:Record<string,readonly [string,string]> = {
     "Baidu’s download page changed. Download was not started.",
     "百度のダウンロード画面が変わったため、開始しませんでした。"
   ],
+  "查看下载页面／验证": [
+    "View download page / verify",
+    "ダウンロード画面を確認／認証"
+  ],
+  "下载页面尚未就绪，请重新读取分享。": [
+    "The download page is not ready. Read the share again.",
+    "ダウンロード画面の準備ができていません。共有を読み取り直してください。"
+  ],
+  "百度网页下载启动超时。请检查登录／安全验证；若百度要求客户端，该文件暂无法在应用内下载。": [
+    "Baidu web download startup timed out. Check sign-in or verification. If Baidu requires its client, this file cannot currently be downloaded in the app.",
+    "百度のウェブダウンロード開始がタイムアウトしました。ログインや認証を確認してください。専用クライアントが必要な場合、このアプリでは現在ダウンロードできません。"
+  ],
+  "下载请求已过期，请重新点击下载。": [
+    "The download request expired. Click download again.",
+    "ダウンロード要求の有効期限が切れました。再度ダウンロードしてください。"
+  ],
+  "联网已关闭，下载已取消。": [
+    "Networking was disabled; the download was cancelled.",
+    "ネット接続が無効になったため、ダウンロードを取り消しました。"
+  ],
+  "百度返回的下载文件名与所选文件不一致，已停止下载。": [
+    "Baidu returned a different filename. The download was stopped.",
+    "百度が返したファイル名が選択したものと異なるため、ダウンロードを停止しました。"
+  ],
+  "百度返回了未获允许的下载来源，已停止下载。": [
+    "Baidu returned a download origin that is not permitted. The download was stopped.",
+    "許可されていないダウンロード元が返されたため、ダウンロードを停止しました。"
+  ],
   "百度未开始网页下载。请检查登录／安全验证；若百度要求客户端，该文件暂无法在应用内下载。": [
     "Baidu did not start a web download. Check sign-in or verification. If Baidu requires its client, this file cannot currently be downloaded in the app.",
     "百度のウェブダウンロードが開始されませんでした。ログインや認証を確認してください。専用クライアントが必要な場合、このアプリでは現在ダウンロードできません。"

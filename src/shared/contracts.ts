@@ -110,6 +110,7 @@ export interface LibraryAPI {
   dismissStarInvite(count:number):Promise<void>;openStarProject(count:number):Promise<void>;
   baiduState():Promise<BaiduState>;
   baiduDownloadsState():Promise<BaiduDownloadState>;
+  openBaiduDownloadVerification():Promise<void>;
   readBaiduShare(text:string,code?:string):Promise<void>;
   openBaiduShareFolder(id:string):Promise<void>;
   backBaiduShare():Promise<void>;

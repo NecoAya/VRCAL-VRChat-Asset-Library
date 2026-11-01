@@ -142,7 +142,7 @@ function setupServices(){
  cloud=new CloudCatalog({read:()=>store.cloudData(),write:data=>store.saveCloudData(data),locals:()=>matchingCatalog(store).all()});
  baiduDownloads?.stop();baidu?.close();baidu=new BaiduWorkspace({onDownload:(event,item,contents)=>baiduDownloads?.accept(event,item,contents)??false,allowDownloadNavigation:(id,url)=>baiduDownloads?.allowNavigation(id,url)??false,onSessionInvalidated:()=>baiduDownloads?.stop(),onShutdown:()=>baiduDownloads?.shutdown(),parent:()=>window,dataDir,roots:protectedRoots,canNetwork:()=>!closing&&!migrating&&store.settings().onlineEnabled&&!process.env.VRC_LIBRARY_NO_NETWORK,getTheme:()=>store.settings().theme||'nasa',getLanguage:()=>store.settings().language,onChanged:changed,onCapture:capture=>{if(closing||migrating)throw new Error('资料库正在关闭或迁移。');cloud.capture(capture as CloudCapture);changed()}});
  const downloadStore=store;
- const downloads=new BaiduDownloads({dataDir,roots:protectedRoots,canProcess:()=>!closing&&!migrating&&!recycleOperation&&store===downloadStore,trash:file=>shell.trashItem(file),onRecycled:source=>{if(store!==downloadStore)return;const ids=downloadStore.all().filter(asset=>path.resolve(asset.path).toLowerCase()===path.resolve(source.file).toLowerCase()).map(asset=>asset.id);if(ids.length)downloadStore.markRecycled(ids);changed()},onExtracted:async directory=>{
+ const downloads=new BaiduDownloads({dataDir,roots:protectedRoots,parent:()=>window,canProcess:()=>!closing&&!migrating&&!recycleOperation&&store===downloadStore,trash:file=>shell.trashItem(file),onRecycled:source=>{if(store!==downloadStore)return;const ids=downloadStore.all().filter(asset=>path.resolve(asset.path).toLowerCase()===path.resolve(source.file).toLowerCase()).map(asset=>asset.id);if(ids.length)downloadStore.markRecycled(ids);changed()},onExtracted:async directory=>{
   if(closing||migrating||recycleOperation||store!==downloadStore)throw new Error('资料库正在关闭或更改，解压文件保留，可稍后重试入库。');
   const result=await scanner.addPaths([directory]);if(result.cancelled||result.errors.length||!result.ids.length)throw new Error('解压完成，但目录尚未完整入库：'+(result.errors.join('；')||'读取已取消。'));
   const record=downloadStore.all().find(asset=>path.resolve(asset.path).toLowerCase()===path.resolve(directory).toLowerCase());if(!record)throw new Error('解压目录尚未登记，文件已保留。');
@@ -336,6 +336,7 @@ function registerHandlers(){
   if(active()){invalidateInboxDownload();inboxDownloadId=id;current.mark(id,'read')}
  });
  handle('baiduDownloadsState' ,()=>baiduDownloads.refreshState());
+ handle('openBaiduDownloadVerification',async()=>{if(!baiduDownloads.openVerification())await baidu.open()});
  handle('readBaiduShare',async(text:unknown,code:unknown)=>{
   const current=inbox,generation=inboxReadGeneration;
   await baiduDownloads.read(text,code);

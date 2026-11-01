@@ -1,6 +1,6 @@
 {
   "name": "vrchat-asset-library",
-  "version": "1.4.0",
+  "version": "1.4.1-preview.1",
   "private": true,
   "license": "SEE LICENSE IN LICENSE",
   "repository": {
@@ -125,6 +125,8 @@
       "docs/MA_MENU_PREVIEW_DIAGNOSTICS.zh-CN.html",
       "docs/images/download-extraction-result-preview16.png",
       "docs/images/download-extraction-options-preview16.png",
+      "docs/RELEASE_1.4.1-preview.1.zh-CN.md",
+      "docs/RELEASE_1.4.1-preview.1.zh-CN.html",
       "docs/RELEASE_1.4.0.zh-CN.md",
       "docs/RELEASE_1.4.0.zh-CN.html",
       "docs/RELEASE_1.4.0-preview.17.zh-CN.md",
