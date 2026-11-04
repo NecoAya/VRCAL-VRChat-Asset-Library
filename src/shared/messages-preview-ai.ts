@@ -1,5 +1,10 @@
 // New copy stays Chinese until the requested final translation pass.
 const sources = [
+  "接口协议",
+  "OpenAI 兼容（Chat Completions）",
+  "只支持 HTTPS。OpenAI 兼容地址填写到版本路径（如 /v1），程序追加 /chat/completions；Anthropic 地址可填写域名或 /v1，程序追加 Messages 路径。请仅填写可信服务商地址：密钥和所选文本会发送至该地址，不保证第三方兼容性。更换地址或协议会清除旧自定义密钥，请重新填写并确认授权。",
+
+  "选择内置或自定义服务商。自定义支持 OpenAI 兼容和 Anthropic Messages 接口，服务费用由所选服务商计费。",
   "检索依据",
   "使用关键词：",
   "BOOTH 类目：",

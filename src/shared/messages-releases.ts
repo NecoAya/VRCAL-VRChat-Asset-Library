@@ -1,4 +1,8 @@
 export const RELEASE_MESSAGES: Record<string, readonly [string,string]> = {
+ '自定义 AI 服务商':['Custom AI providers','カスタム AI プロバイダー'],
+ 'AI 设置新增自定义服务商，支持 OpenAI 兼容和 Anthropic Messages 协议，可配置 HTTPS API 地址、模型和加密密钥。':['AI settings support custom OpenAI-compatible and Anthropic Messages endpoints, model IDs and encrypted keys.','AI 設定で OpenAI 互換と Anthropic Messages のカスタム HTTPS API、モデル ID、暗号化キーを設定できます。'],
+ '更换自定义地址或协议会清除旧密钥，并要求重新确认接收方；用途授权、限额、脱敏和结果校验保持不变。':['Changing the custom address or protocol clears the old key and requires renewed consent; scope, quotas, redaction and validation remain unchanged.','カスタム URL または方式を変更すると旧キーを削除し、送信先への再同意が必要です。用途、上限、秘匿化、結果検証は維持します。'],
+ '仅本地开发构建，未公开发布，不代表所有第三方服务已经验收。':['Local development build only, not a public release; third-party services have not all been verified.','ローカル開発ビルドのみで公開リリースではありません。すべての外部サービスでの動作を検証したものではありません。'],
  "Prefab 只读组合预览与百度下载提示":["Read-only Prefab composition previews and Baidu download guidance","Prefab の読み取り専用組み合わせプレビューと百度ダウンロードの案内"],
  "新增 Prefab 层级、网格和近似材质预览，支持已登记目录、ZIP、Unitypackage 与 Unity 工程，也可用于角色和衣服静态组合。":["Preview Prefab hierarchies, meshes and approximate materials from registered folders, ZIPs, Unitypackages and Unity projects, including static avatar and clothing combinations.","登録済みフォルダー、ZIP、Unitypackage、Unity プロジェクトから Prefab の階層・メッシュ・近似マテリアルを表示し、アバターと衣装の静止組み合わせにも利用できます。"],
  "保留关闭物体的子树隐藏、静态骨骼与祖先变换；修正 GUID、长 fileID、依赖范围和组合资源预算处理。":["Preserve hidden inactive subtrees, static skeletons and ancestor transforms; correct GUIDs, long fileIDs, dependency boundaries and shared resource budgets.","無効なオブジェクトの子階層の非表示、静止骨格、祖先の変換を保持し、GUID・長い fileID・依存範囲・共有リソース予算の処理を修正しました。"],

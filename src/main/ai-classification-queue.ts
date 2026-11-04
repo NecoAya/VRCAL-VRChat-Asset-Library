@@ -62,7 +62,7 @@ export class AiClassificationQueue {
   private allowed():boolean {try{return this.enabled&&this.options.canRun();}catch{return false;}}
   private set(patch:Partial<AiClassificationQueueState>):void {const next={...this.snapshot,...patch};if(JSON.stringify(next)===JSON.stringify(this.snapshot))return;this.snapshot=next;try{this.options.changed();}catch{/* UI listeners must not break the queue. */}}
   private fingerprint(input:AiClassificationInput,state:AiPublicState):string {
-    return createHash('sha256').update(JSON.stringify({version:1,provider:state.provider,model:state.model,workspace:state.qwenWorkspaceId,input:prepareClassificationInput(input)})).digest('hex');
+    return createHash('sha256').update(JSON.stringify({version:1,provider:state.provider,model:state.model,workspace:state.qwenWorkspaceId,customBaseUrl:state.customBaseUrl,customProtocol:state.customProtocol,input:prepareClassificationInput(input)})).digest('hex');
   }
   private async run():Promise<void> {
     if(!this.allowed()){this.set({running:false,current:'',message:'自动分类已暂停。'});return;}
@@ -74,7 +74,7 @@ export class AiClassificationQueue {
       .map(input=>({input,fingerprint:this.fingerprint(input,state)})).filter(a=>attempts.get(a.input.assetId)?.fingerprint!==a.fingerprint);
     this.set({pending:candidates.length,completed:[...attempts.values()].filter(a=>a.completed).length});
     if(!candidates.length){this.set({running:false,current:'',message:'已处理当前符合条件的服装；有新商品信息时继续。'});return;}
-    const settingsKey=JSON.stringify([state.provider,state.model,state.qwenWorkspaceId,state.dailyCallLimit,state.keyStatus]);
+    const settingsKey=JSON.stringify([state.provider,state.model,state.qwenWorkspaceId,state.customBaseUrl,state.customProtocol,state.dailyCallLimit,state.keyStatus]);
     if(this.waitUntil>this.now()&&this.waitSettings===settingsKey)return;
     if(state.callsToday>=state.dailyCallLimit){this.waitSettings=settingsKey;this.waitUntil=Date.parse(new Date(this.now()).toISOString().slice(0,10)+'T00:00:00Z')+86400000;this.set({message:'今日 AI 调用额度已用完，明天继续。'});return;}
     const candidate=candidates[0];
