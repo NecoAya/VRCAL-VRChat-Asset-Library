@@ -19,8 +19,9 @@ function load(relative) {
 test('history separates public previews, unpublished trials and stable releases in chronological order', () => {
   const {RELEASE_NOTES, filterReleaseNotes} = load('shared/release-notes.ts');
   assert.equal(require('../package.json').version, '1.4.1');
-  assert.equal(RELEASE_NOTES[0].version, require('../package.json').version);
-  assert.equal(RELEASE_NOTES[0].channel, 'stable');
+  assert.equal(RELEASE_NOTES[0].version, '1.4.2-local.1');
+  assert.equal(RELEASE_NOTES[0].channel, 'local');
+  assert.equal(RELEASE_NOTES.find(note=>note.channel==='stable').version, require('../package.json').version);
   const previews=filterReleaseNotes({channel:'preview'});
   assert(previews.some(note=>note.version==='1.4.1-preview.1'));
   assert(!previews.some(note=>note.version===require('../package.json').version));

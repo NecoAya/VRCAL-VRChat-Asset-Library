@@ -14,6 +14,10 @@ export interface ReleaseNote {
 // neither semver sorting nor this list determines the running/latest version.
 // This is bundled documentation and never requires a GitHub request.
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
+  {version:'1.4.2-local.1',date:'2026-11-05',channel:'local',title:'自定义 AI 服务商',sections:[
+    {kind:'added',items:['AI 设置新增自定义服务商，支持 OpenAI 兼容和 Anthropic Messages 协议，可配置 HTTPS API 地址、模型和加密密钥。']},
+    {kind:'notes',items:['更换自定义地址或协议会清除旧密钥，并要求重新确认接收方；用途授权、限额、脱敏和结果校验保持不变。','仅本地开发构建，未公开发布，不代表所有第三方服务已经验收。']}
+  ]},
   {version:'1.4.1',date:'2026-11-01',channel:'stable',title:"Prefab 只读组合预览与百度下载提示",sections:[
     {kind:'added',items:["新增 Prefab 层级、网格和近似材质预览，支持已登记目录、ZIP、Unitypackage 与 Unity 工程，也可用于角色和衣服静态组合。"]},
     {kind:'fixed',items:["保留关闭物体的子树隐藏、静态骨骼与祖先变换；修正 GUID、长 fileID、依赖范围和组合资源预算处理。"]},

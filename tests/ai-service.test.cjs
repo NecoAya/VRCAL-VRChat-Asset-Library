@@ -111,3 +111,39 @@ test('collected C# exception messages reach AI while stack frames and source lin
  const r=await f.s.diagnose({projectId:project.id,excerpt,unityVersion:report.projectVersion});assert.equal(r.ok,true);assert.equal(f.calls.length,1);for(const name of ['NullReferenceException','MissingReferenceException','System.ArgumentException'])assert(f.calls[0].init.body.includes(name));assert(!f.calls[0].init.body.includes('PRIVATE_FRAME'));assert(!f.calls[0].init.body.includes(project.path));
  assert.equal(prepareDiagnosticInput({projectId:'p',excerpt:'throw new NullReferenceException("PRIVATE_SOURCE");\nLogger.Error("PRIVATE_SOURCE");\n at PrivateException.Run()'}).excerpt,'');
 });
+
+test('custom OpenAI endpoint, model IDs and encrypted receiver-bound key survive restart',async t=>{
+ const f=fixture(t);await f.enable({provider:'custom',model:'vendor/model:latest',customBaseUrl:'https://example.com/v1/',customProtocol:'openai'});
+ assert.equal((await f.s.classify({assetId:'a',publicTitle:'dress'})).ok,true);
+ assert.equal(f.calls[0].url,'https://example.com/v1/chat/completions');
+ assert.equal(JSON.parse(f.calls[0].init.body).model,'vendor/model:latest');
+ const second=new AiService(f.options);t.after(()=>second.close());assert.equal((await second.getState()).keyConfigured,true);
+ await assert.rejects(second.updateSettings({customBaseUrl:'https://other.example/v1'}),/同意/);
+ await second.updateSettings({customBaseUrl:'https://other.example/v1',consentVersion:1});
+ assert.equal((await second.getState()).keyConfigured,false);
+ assert.equal((await second.classify({assetId:'b',publicTitle:'dress'})).code,'key-required');
+});
+test('custom Anthropic Messages uses native headers and parses bounded text only',async t=>{
+ const f=fixture(t,{fetchImpl:async(url,init)=>{f.calls.push({url,init});return new Response(JSON.stringify({stop_reason:'end_turn',content:[{type:'thinking',thinking:'not a result'},{type:'text',text:JSON.stringify(classification)}]}));}});
+ await f.enable({provider:'custom',model:'claude-opus-5-5',customBaseUrl:'https://api.anthropic.com',customProtocol:'anthropic'});
+ const r=await f.s.classify({assetId:'a',publicTitle:'dress'});assert.equal(r.ok,true);
+ const {url,init}=f.calls[0];assert.equal(url,'https://api.anthropic.com/v1/messages');assert(init.headers['x-api-key']);assert.equal(init.headers.Authorization,undefined);
+ const b=JSON.parse(init.body);assert.equal(typeof b.system,'string');assert.equal(b.messages[0].role,'user');assert.equal(b.response_format,undefined);
+ assert(!JSON.stringify(r).includes('SECRET'));
+});
+test('custom addresses reject insecure URLs, URL credentials and query tokens',async t=>{
+ const f=fixture(t);
+ for(const url of ['http://example.com/v1','https://user:pass@example.com/v1','https://example.com/v1?key=secret','https://example.com/#secret','not a url']) await assert.rejects(f.enable({provider:'custom',model:'model',customBaseUrl:url}));
+ assert.equal(f.calls.length,0);
+});
+test('Anthropic truncation, refusals and tool calls cannot become advice',async t=>{
+ for(const payload of [{stop_reason:'max_tokens',content:[{type:'text',text:JSON.stringify(classification)}]},{stop_reason:'refusal',content:[]},{stop_reason:'end_turn',content:[{type:'tool_use',name:'run'}]}]){
+  const f=fixture(t,{fetchImpl:async()=>new Response(JSON.stringify(payload))});await f.enable({provider:'custom',model:'claude-opus-5-5',customBaseUrl:'https://example.com/v1',customProtocol:'anthropic'});
+  assert.equal((await f.s.classify({assetId:'a',publicTitle:'dress'})).code,'invalid-response');
+ }
+});
+test('editing stored custom endpoint cannot send an existing key to the replacement receiver',async t=>{
+ const f=fixture(t);await f.enable({provider:'custom',model:'model',customBaseUrl:'https://example.com/v1'});
+ const file=path.join(f.dir,'ai-settings.json'),s=JSON.parse(fs.readFileSync(file,'utf8'));s.customBaseUrl='https://other.example/v1';fs.writeFileSync(file,JSON.stringify(s));
+ const second=new AiService(f.options);t.after(()=>second.close());assert.equal((await second.getState()).keyStatus,'unavailable');assert.equal((await second.classify({assetId:'a',publicTitle:'dress'})).code,'encryption-unavailable');assert.equal(f.calls.length,0);
+});

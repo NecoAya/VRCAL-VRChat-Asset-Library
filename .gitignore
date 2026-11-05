@@ -1,6 +1,15 @@
 node_modules/
 dist/
 build-stage/
+# Local distributables and packaging output must never enter source control.
+release/
+releases-local/
+*.exe
+*.msi
+*.blockmap
+*.asar
+VRC-Asset-Library-*.zip
+VRCAL-*-Source.zip
 outputs/
 test-artifacts/
 tests/.fixtures*/

@@ -1,11 +1,13 @@
 /** Renderer-safe AI contracts. Credentials are write-only; never include them in state. */
 export const AI_CONSENT_VERSION = 1 as const;
 export const AI_CONSENT_TEXT = '启用后将所选范围内的公开商品文字、文件名线索、你输入的找素材描述或脱敏后的 Unity 错误摘要发送给所选 AI 服务商。不会发送本地图片、源码、完整日志或完整路径。API 调用可能收费，默认每天最多 20 次；分类、诊断与找素材共用额度。AI 内容是建议，不修改主分类、官方信息或工程文件。';
-export type AiProviderId = 'qwen' | 'kimi' | 'deepseek';
+export type AiProviderId = 'qwen' | 'kimi' | 'deepseek' | 'custom';
+export type AiCustomProtocol = 'openai' | 'anthropic';
 export const AI_PROVIDERS = [
   { id: 'qwen', label: '千问（百炼北京）', defaultModel: 'qwen-plus', helpUrl: 'https://help.aliyun.com/zh/model-studio/get-api-key/' },
   { id: 'kimi', label: 'Kimi（月之暗面）', defaultModel: 'kimi-k2.6', helpUrl: 'https://platform.kimi.com/console/api-keys' },
   { id: 'deepseek', label: 'DeepSeek', defaultModel: 'deepseek-flash', helpUrl: 'https://platform.deepseek.com/api_keys' },
+  { id: 'custom', label: '自定义', defaultModel: '', helpUrl: '' },
 ] as const;
 export const AI_CLOTHING_TYPES = ['连衣裙','上衣','外套','半身裙','裤装','鞋袜','内衣','套装','制服','泳装','其他'] as const;
 export const AI_STYLES = ['日常','甜美','可爱','休闲','运动','街头','哥特','洛丽塔','和风','中式','赛博','科幻','奇幻','复古','正式','性感','其他'] as const;
@@ -18,6 +20,8 @@ export interface AiSettingsUpdate {
   discoveryEnabled?: boolean;
   provider?: AiProviderId;
   model?: string;
+  customProtocol?: AiCustomProtocol;
+  customBaseUrl?: string;
   /** Optional Beijing workspace ID (not an arbitrary URL). Empty uses compatible DashScope host. */
   qwenWorkspaceId?: string;
   dailyCallLimit?: number;
@@ -32,6 +36,8 @@ export interface AiPublicState {
   discoveryEnabled: boolean;
   provider: AiProviderId;
   model: string;
+  customProtocol: AiCustomProtocol;
+  customBaseUrl: string;
   qwenWorkspaceId: string;
   dailyCallLimit: number;
   callsToday: number;

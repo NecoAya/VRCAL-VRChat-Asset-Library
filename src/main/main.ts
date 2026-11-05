@@ -302,7 +302,7 @@ function registerHandlers(){
  handle('openDiscoveryProduct',async(url:string)=>{if(!store.settings().onlineEnabled||process.env.VRC_LIBRARY_NO_NETWORK)throw new Error('请先开启联网。');const item=discovery.product(url);if(!item)throw new Error('请从当前搜索结果打开商品。');if(item.platform==='booth')await booth.openDiscovery(item.url);else await xianyu.openDiscovery(item.url)});
  handle('openDiscoverySearch',async(platform:unknown)=>{if(platform!=='booth'&&platform!=='xianyu')throw new Error('平台无效。');if(!store.settings().onlineEnabled||process.env.VRC_LIBRARY_NO_NETWORK)throw new Error('请先开启联网。');const url=discovery.searchLink(platform);if(platform==='booth')await booth.openDiscovery(url);else await xianyu.openDiscovery(url)});
  handle('configureAI',async(value:AiSettingsUpdate)=>{const state=await aiService.updateSettings(value);discovery?.cancel();changed();return state});
- handle('openAIHelp',async(provider:string)=>{const item=AI_PROVIDERS.find(p=>p.id===provider);if(!item)throw new Error('服务商无效。');await shell.openExternal(item.helpUrl)});
+ handle('openAIHelp',async(provider:string)=>{const item=AI_PROVIDERS.find(p=>p.id===provider);if(!item || !item.helpUrl)throw new Error('请向自定义服务商获取密钥。');await shell.openExternal(item.helpUrl)});
  handle('aiQueueState',()=>aiQueue.state());
  handle('retryAIClassification',(id?:string)=>{if(id)getAsset(id);aiQueue.retry(id);changed()});
  handle('aiClassification',(id:string)=>{getAsset(id);return aiService.getClassification(id)});

@@ -74,7 +74,7 @@ export class AiService {
   }
   async getState(): Promise<AiPublicState> {
     const s=this.settings.settings,status=this.settings.keyStatus();
-    return {enabled:s.enabled,classificationEnabled:s.classificationEnabled,diagnosticsEnabled:s.diagnosticsEnabled,discoveryEnabled:s.discoveryEnabled,provider:s.provider,model:s.model,qwenWorkspaceId:s.qwenWorkspaceId,dailyCallLimit:s.dailyCallLimit,callsToday:this.currentUsage().calls,consentVersion:s.consentVersion,keyConfigured:status==='configured',keyStatus:status,encryptionAvailable:this.settings.encryptionAvailable(),busy:this.active.size>0,...(this.settings.error||this.storageError?{error:this.settings.error??errors.storage}:{})};
+    return {enabled:s.enabled,classificationEnabled:s.classificationEnabled,diagnosticsEnabled:s.diagnosticsEnabled,discoveryEnabled:s.discoveryEnabled,provider:s.provider,model:s.model,customProtocol:s.customProtocol,customBaseUrl:s.customBaseUrl,qwenWorkspaceId:s.qwenWorkspaceId,dailyCallLimit:s.dailyCallLimit,callsToday:this.currentUsage().calls,consentVersion:s.consentVersion,keyConfigured:status==='configured',keyStatus:status,encryptionAvailable:this.settings.encryptionAvailable(),busy:this.active.size>0,...(this.settings.error||this.storageError?{error:this.settings.error??errors.storage}:{})};
   }
   async updateSettings(patch: AiSettingsUpdate): Promise<AiPublicState> {
     if(this.closed)throw new Error(errors.cancelled);
@@ -126,7 +126,7 @@ export class AiService {
       const e=value as CacheEntry;
       if(!e||(e.kind!=='classification'&&e.kind!=='diagnostic'&&e.kind!=='discovery')||typeof e.key!=='string'||!/^[a-f0-9]{64}$/.test(e.key))return null;
       const p=e.record?.provenance;
-      if(!p||!isAiProvider(p.provider)||typeof p.model!=='string'||!/^[a-z0-9._-]{1,100}$/i.test(p.model)||p.schemaVersion!==1||!/^[a-f0-9]{64}$/.test(p.inputHash)||!Number.isFinite(p.generatedAt)||p.generatedAt<0||p.inputScope!==(e.kind==='classification'?'public-text-and-filename':e.kind==='diagnostic'?'redacted-unity-errors':'search-description'))return null;
+      if(!p||!isAiProvider(p.provider)||typeof p.model!=='string'||!/^[a-z0-9][a-z0-9._\/:-]{0,99}$/i.test(p.model)||p.schemaVersion!==1||!/^[a-f0-9]{64}$/.test(p.inputHash)||!Number.isFinite(p.generatedAt)||p.generatedAt<0||p.inputScope!==(e.kind==='classification'?'public-text-and-filename':e.kind==='diagnostic'?'redacted-unity-errors':'search-description'))return null;
       const provenance={provider:p.provider,model:p.model,generatedAt:p.generatedAt,inputHash:p.inputHash,schemaVersion:1 as const,inputScope:p.inputScope};
       const id=recordId(e.record);if(!localId(id))return null;
       const record=e.kind==='classification'?{assetId:id,suggestion:parseClassification(e.record.suggestion),provenance}:e.kind==='diagnostic'?{projectId:id,suggestion:parseDiagnostic(e.record.suggestion),provenance}:{searchId:id,suggestion:parseDiscovery(e.record.suggestion),provenance};
@@ -144,7 +144,7 @@ export class AiService {
     if(keyStatus==='missing')return failure('key-required');
     if(keyStatus==='unavailable')return failure('encryption-unavailable');
     const endpoint=aiEndpoint(s),prompt=aiSystemPrompt(kind);
-    const hash=createHash('sha256').update(JSON.stringify({kind,provider:s.provider,model:s.model,endpoint,prompt,input,schemaVersion:1})).digest('hex');
+    const hash=createHash('sha256').update(JSON.stringify({kind,provider:s.provider,model:s.model,endpoint,protocol:s.customProtocol,prompt,input,schemaVersion:1})).digest('hex');
     const cached=this.cache.find(e=>e.key===hash&&e.kind===kind&&this.fresh(e));
     if(cached){
       const record=structuredClone(cached.record);if('assetId'in record)record.assetId=id;else if('projectId'in record)record.projectId=id;else record.searchId=id;
@@ -170,11 +170,16 @@ export class AiService {
       try {writeAiJson(path.join(this.options.dataDir,'ai-usage.json'),this.usage);}catch{this.storageError=true;throw new AiFailure('storage');}
       const body={model:s.model,messages:[{role:'system',content:prompt},{role:'user',content:JSON.stringify(input)}],response_format:{type:'json_object'},max_tokens:kind==='classification'?1200:2400,stream:false,
         ...(s.provider==='qwen'?{enable_thinking:false}:{}),...(s.provider==='kimi'&&/^kimi-k2\./.test(s.model)?{thinking:{type:'disabled'}}:{})};
+      const anthropic=s.provider==='custom' && s.customProtocol==='anthropic';
+      const requestBody=anthropic ? {model:s.model,system:prompt,messages:[{role:'user',content:JSON.stringify(input)}],max_tokens:kind==='classification'?1200:2400,stream:false} : body;
+      const headers:Record<string,string>=anthropic ? {'x-api-key':key,'anthropic-version':'2023-06-01','Content-Type':'application/json'} : {Authorization:`Bearer ${key}`,'Content-Type':'application/json'};
       const operation=async()=>{
-        const response=await this.fetchImpl(endpoint,{method:'POST',headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify(body),signal:controller.signal,redirect:'error',credentials:'omit',cache:'no-store'});
+        const response=await this.fetchImpl(endpoint,{method:'POST',headers,body:JSON.stringify(requestBody),signal:controller.signal,redirect:'error',credentials:'omit',cache:'no-store'});
         if(!response.ok){void response.body?.cancel().catch(()=>{});throw new AiFailure(response.status===401||response.status===403?'authentication':response.status===429?'rate-limit':'provider-error');}
         const payload=await this.readResponse(response);
-        const choice=(payload as {choices?:Array<{finish_reason?:unknown;message?:{content?:unknown;tool_calls?:unknown;refusal?:unknown}}>})?.choices?.[0];
+        const message=payload as {stop_reason?:unknown;content?:Array<{type?:unknown;text?:unknown}>};
+        if(anthropic && (message.stop_reason!=='end_turn' || !Array.isArray(message.content) || message.content.some(b=>b.type!=='text'&&b.type!=='thinking'&&b.type!=='redacted_thinking'))) throw new AiFailure('invalid-response');
+        const choice=anthropic ? {finish_reason:'stop',message:{content:message.content!.filter(b=>b.type==='text').map(b=>typeof b.text==='string'?b.text:'').join('')}} : (payload as {choices?:Array<{finish_reason?:unknown;message?:{content?:unknown;tool_calls?:unknown;refusal?:unknown}}>})?.choices?.[0];
         if(choice?.finish_reason!=='stop'||choice.message?.tool_calls||choice.message?.refusal||typeof choice.message?.content!=='string'||choice.message.content.length>16000)throw new AiFailure('invalid-response');
         try {
           // Even a hostile provider reflecting its Authorization header cannot echo the saved key into IPC/cache.
