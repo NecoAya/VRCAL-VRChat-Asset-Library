@@ -22,7 +22,7 @@ const render=(Component,props)=>load(renderToStaticMarkup(React.createElement(Co
 test('ZIP controls show saved choices and explain conditional recycling and unsupported formats',()=>{
  const $=render(BaiduExtractionSettings,{options:{autoExtract:false,recycleArchives:false},busy:false,onChange(){}});
  assert.equal($('input[type=checkbox]').length,2);assert.equal($('input[checked]').length,0);assert.equal($('input[disabled]').length,0);
- assert($('body').text().includes('解压并入库成功后'));assert($('body').text().includes('失败时保留原压缩包'));assert($('body').text().includes('RAR／7z 暂不支持'));assert($('body').text().includes('Unitypackage 保留原文件'));
+ assert($('body').text().includes('解压并入库成功后'));assert($('body').text().includes('失败时保留原压缩包'));assert($('body').text().includes('自动解压仅支持 ZIP'));
  const saved=render(BaiduExtractionSettings,{options:{autoExtract:true,recycleArchives:true},busy:true,onChange(){}});assert.equal(saved('input[checked]').length,2);assert.equal(saved('input[disabled]').length,2);
 });
 test('offline logged-out history permits only completed unrecycled ZIP files and uses safe defaults',()=>{
@@ -30,7 +30,7 @@ test('offline logged-out history permits only completed unrecycled ZIP files and
  const controls=$('input[aria-label^="选择解压 "]');assert.deepEqual(controls.map((_i,element)=>$(element).attr('aria-label')).get(),['选择解压 model.zip','选择解压 texture.ZIP']);assert.equal(controls.filter('[disabled]').length,0);
  assert.equal($('.baidu-extraction-settings input[checked]').length,0);assert.equal($('.baidu-extraction-settings input[disabled]').length,0);
  const archived=$('.baidu-download-task').filter((_i,element)=>$(element).find('strong').text()==='old.zip');assert(archived.text().includes('原压缩包已移至回收站'));assert.equal(archived.find('button').length,0);
- assert($('body').text().includes('每个压缩包使用独立子目录'));assert.equal($('textarea[disabled]').length,1);
+ assert($('body').text().includes('各压缩包解压到独立子目录'));assert.equal($('textarea[disabled]').length,1);
 });
 test('selected model and material archives submit as one local job while offline',async()=>{
  const state=fixture(),calls=[];const api={extractBaiduDownloads:async(ids,recycle)=>{calls.push([ids,recycle])},baiduDownloadsState:async()=>state};

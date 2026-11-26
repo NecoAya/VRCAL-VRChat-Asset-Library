@@ -26,11 +26,10 @@ export function LocalReviewImagePreview({image,name,onClose}:{image:string;name:
  },[onClose]);
  return <div className="review-local-image-overlay" onMouseDown={event=>{if(event.target===event.currentTarget)onClose()}}>
   <div ref={dialog} className="review-local-image-preview" role="dialog" aria-modal="true" aria-label={t('本地图片预览')}>
-   <header className="review-local-image-preview-heading"><div><span>{t('本地')}</span><h2 title={name}>{name}</h2></div><button type="button" className="button small" aria-label={t('关闭本地图片预览')} onClick={onClose}>{t('关闭')}</button></header>
+   <header className="review-local-image-preview-heading"><div><h2 title={name}>{name}</h2></div><button type="button" className="button small" aria-label={t('关闭本地图片预览')} onClick={onClose}>{t('关闭')}</button></header>
    <div className="review-local-image-preview-body" tabIndex={0} role="region" aria-label={t('本地图片')}>
     {failed?<p role="status">{t('本地图片暂不可用')}</p>:<img src={imageUrl(image)} alt={name} onError={()=>setFailed(true)}/>}
    </div>
-   <p className="review-local-image-preview-note">{t('仅供对照，不会确认商品来源')}</p>
   </div>
  </div>;
 }

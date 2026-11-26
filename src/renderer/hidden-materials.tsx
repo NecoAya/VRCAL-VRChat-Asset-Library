@@ -16,7 +16,6 @@ export function HiddenMaterials({onRecycle,api,run,revision,disabled=false}:{onR
  const recycle=async(ids:string[])=>{if(locked||!ids.length)return;setBusy(true);try{await onRecycle(ids)}finally{setBusy(false)}};
  return <section ref={page} tabIndex={-1} className="hidden-page hidden-materials" aria-label={t('已隐藏素材')}>
   <div className="hidden-page-content">
-   <p className="hidden-intro">{t('只在本应用隐藏；原文件、封面和标注仍保留。恢复后可再次浏览和匹配。')}</p>
    <div className="hidden-controls"><input className="hidden-search" type="search" value={search} maxLength={500} aria-label={t('搜索已隐藏素材')} placeholder={t('搜索名称或路径')} onChange={event=>{setLoading(true);setSearch(event.target.value);setLimit(50)}}/>
    <p className="hidden-count" role="status">{loading?t('正在读取…'):t('共 {v0} 个条目',{v0:total.toLocaleString()})}</p>
    {items.length>0&&<div className="hidden-bulk"><label><input type="checkbox" disabled={locked} checked={items.every(item=>selected.has(item.id))} onChange={event=>setSelected(event.target.checked?new Set(items.map(item=>item.id)):new Set())}/>{t('选择已显示条目')}</label><button className="button small" disabled={locked||!selected.size} onClick={()=>restore([...selected])}>{t('恢复所选')} ({selected.size})</button><button className="button small recycle-danger" disabled={locked||!selected.size} onClick={()=>recycle([...selected])}>{t('批量删除（移入回收站）')}</button></div>}</div>

@@ -53,17 +53,9 @@
 :root[data-theme='swiss'] .brand-mark svg { width: 22px; height: 22px; }
 :root[data-theme='swiss'] .brand strong { font-size: 15px; line-height: 1.3; letter-spacing: -.6px; color: var(--swiss-ink); }
 :root[data-theme='swiss'] .brand span { font-size: 9px; line-height: 1.6; letter-spacing: 0; color: var(--swiss-ink); }
-:root[data-theme='swiss'] .theme-identity { display: flex; flex-direction: column; gap: 6px; padding: 0 0 24px; }
-:root[data-theme='swiss'] .theme-kicker { font-size: 9px; letter-spacing: .7px; line-height: 1.7; color: var(--swiss-ink); }
-:root[data-theme='swiss'] .theme-wordmark { font-size: 12px; line-height: 1.3; letter-spacing: -.25px; color: var(--swiss-ink); }
-:root[data-theme='swiss'] .theme-wordmark-nasa { display: none; }
-:root[data-theme='swiss'] .theme-wordmark-swiss { display: block; }
-:root[data-theme='swiss'] .theme-subtitle { font-size: 9px; line-height: 1.7; color: var(--swiss-ink); }
 :root[data-theme='swiss'] :is(.theme-band,.theme-annotation) { display: none; }
-:root[data-theme='swiss'] .theme-station { display: flex; align-items: baseline; gap: 12px; margin: 0 var(--swiss-gutter); padding: 12px 0 7px; border-bottom: 1px solid var(--swiss-ink); flex-shrink: 0; }
 :root[data-theme='swiss'] .module-id { font-size: 20px; line-height: 1.1; font-weight: 700 !important; letter-spacing: -1px; }
 :root[data-theme='swiss'] .module-title { font-size: 9px; letter-spacing: .2px; }
-:root[data-theme='swiss'] .theme-footer { display: flex; align-items: baseline; gap: 10px; margin: 0 var(--swiss-gutter); padding: 10px 0; border-top: 1px solid var(--swiss-ink); font-size: 9px; line-height: 1.7; color: var(--swiss-ink); flex-shrink: 0; }
 :root[data-theme='swiss'] .sidebar-label { padding: 0; color: var(--swiss-ink); font-size: 9px; line-height: 1.7; letter-spacing: .4px; margin-bottom: 10px; }
 :root[data-theme='swiss'] :is(.category-label,.collection-label) { margin-top: 30px; }
 :root[data-theme='swiss'] :is(.nav-item,.category-item) { min-height: 36px; margin: 0; padding: 8px 0; gap: 9px; color: var(--swiss-ink); font-size: 11px; line-height: 1.5; border-bottom: 1px solid transparent; background: transparent; }
@@ -75,7 +67,6 @@
 :root[data-theme='swiss'] .category-item.active .category-dot { background: var(--swiss-red); }
 :root[data-theme='swiss'] .nav-pending { background: transparent; padding: 0; }
 :root[data-theme='swiss'] .sidebar-bottom { padding-top: 18px; }
-:root[data-theme='swiss'] .source-note { color: var(--swiss-ink); border-color: var(--swiss-ink); padding: 12px 0; font-size: 9px; }
 :root[data-theme='swiss'] .tiny-pill { color: var(--swiss-ink); border-color: var(--swiss-ink); padding: 1px 4px; }
 :root[data-theme='swiss'] :is(.collection-edit,.category-label button) { color: var(--swiss-ink); }
 :root[data-theme='swiss'] .collection-nav-row>.nav-item { padding-left: 0; font-size: 10px; }
@@ -100,7 +91,6 @@
 :root[data-theme='swiss'] .search-field { background: transparent; color: var(--swiss-ink); border: 0; border-bottom: 1px solid var(--swiss-ink); padding: 0; min-height: 42px; }
 :root[data-theme='swiss'] .search-field input { background: transparent; color: var(--swiss-ink); font-size: 12px; }
 :root[data-theme='swiss'] input::placeholder,:root[data-theme='swiss'] textarea::placeholder { color: var(--swiss-ink); opacity: .6; }
-:root[data-theme='swiss'] .search-field kbd { font-size: 9px; border: 0; padding: 0; color: var(--swiss-ink); }
 :root[data-theme='swiss'] .filter-row { min-height: 56px; gap: 8px; color: var(--swiss-ink); flex-wrap: wrap; padding: 8px 0; }
 :root[data-theme='swiss'] .filter-row select { color: var(--swiss-ink); background: transparent; border: 0; border-bottom: 1px solid var(--swiss-ink); font-size: 10px; padding: 6px 2px; }
 :root[data-theme='swiss'] :is(.result-caption,.online-switch,.breadcrumb,.breadcrumb strong,.breadcrumb>span) { color: var(--swiss-ink); }
@@ -125,7 +115,6 @@
 :root[data-theme='swiss'] :is(.card-cover>img,.detail-cover>img,.review-candidate-cover>img) { background: var(--swiss-paper); }
 :root[data-theme='swiss'] .cover-placeholder { background: var(--swiss-paper); color: var(--swiss-ink); align-items: flex-start; justify-content: flex-end; gap: 12px; padding: 18px 18px 48px; }
 :root[data-theme='swiss'] .cover-placeholder>span { display: none; }
-:root[data-theme='swiss'] .placeholder-orbit { display: none; }
 :root[data-theme='swiss'] :is(.card-category,.card-badge,.card-favorite,.cover-change) { background: var(--swiss-paper); border: 1px solid var(--swiss-ink); color: var(--swiss-ink); }
 :root[data-theme='swiss'] .card-category { padding: 4px 6px; font-size: 9px; }
 :root[data-theme='swiss'] .card-select>span { background: var(--swiss-paper); color: transparent; border: 1px solid var(--swiss-ink); }
@@ -134,14 +123,14 @@
 :root[data-theme='swiss'] .is-favorite svg { fill: none; }
 :root[data-theme='swiss'] .card-body { padding: 12px 0 0; }
 :root[data-theme='swiss'] .card-body h3 { font-size: 13px; line-height: 1.6; height: 42px; color: var(--swiss-ink); letter-spacing: -.15px; }
-:root[data-theme='swiss'] :is(.card-author,.card-avatars,.card-search-evidence,.card-footer,.card-footer>button,.card-status) { color: var(--swiss-ink); }
+:root[data-theme='swiss'] :is(.card-footer) { color: var(--swiss-ink); }
+:root[data-theme='swiss'] :is(.card-author, .card-avatars, .card-search-evidence, .card-footer>button, .card-status) { color: var(--swiss-ink); }
 :root[data-theme='swiss'] .card-author { margin-top: 7px; font-size: 10px; }
 :root[data-theme='swiss'] .card-tags { gap: 6px; margin-top: 14px; }
-:root[data-theme='swiss'] .card-tags>span { color: var(--swiss-ink); background: transparent; border-bottom: 1px solid var(--swiss-ink); padding: 0 0 2px; font-size: 9px; }
-:root[data-theme='swiss'] .card-footer { border-color: var(--swiss-ink); font-size: 9px; padding-top: 10px; margin-top: 12px; gap: 6px; }
+:root[data-theme='swiss'] .card-tags>span { color: var(--swiss-ink); border-bottom: 1px solid var(--swiss-ink); font-size: 9px; }
+:root[data-theme='swiss'] .card-footer { font-size: 9px; padding-top: 10px; margin-top: 12px; gap: 6px; }
 :root[data-theme='swiss'] .card-status-review { color: var(--swiss-red); }
 :root[data-theme='swiss'] :is(.gallery-footnote,.search-boundary) { justify-content: flex-start; color: var(--swiss-ink); font-size: 9px; line-height: 1.8; }
-:root[data-theme='swiss'] .gallery-footnote { border-top: 1px solid var(--swiss-ink); padding-top: 18px; margin-top: 36px; }
 :root[data-theme='swiss'] .load-more { justify-content: flex-start; }
 :root[data-theme='swiss'] .asset-grid.view-list { display: grid; grid-template-columns: repeat(12,minmax(0,1fr)); gap: 0; counter-reset: swiss-material; }
 :root[data-theme='swiss'] .view-list>.asset-card { grid-column: 1/-1; display: grid; grid-template-columns: 26px 72px minmax(0,1fr); gap: 14px; padding: 15px 0; }
@@ -155,9 +144,11 @@
 :root[data-theme='swiss'] .view-list.density-spacious .asset-card { grid-template-columns: 26px 94px minmax(0,1fr); padding: 24px 0; gap: 20px; }
 
 /* Right-hand records, comparison labels and project evidence. */
-:root[data-theme='swiss'] :is(.detail-header,.detail-tabs,.detail-section,.path-box,.local-member,.evidence-list,.member-notes,.project-material-card,.project-material-evidence,.file-entry) { border-color: var(--swiss-ink); background: transparent; }
+:root[data-theme='swiss'] :is(.path-box, .project-material-card, .project-material-evidence) { background: transparent; }
+:root[data-theme='swiss'] :is(.detail-header, .detail-tabs, .detail-section, .local-member, .evidence-list, .member-notes, .file-entry) { border-color: var(--swiss-ink); background: transparent; }
 :root[data-theme='swiss'] .detail-header { min-height: 54px; padding: 0 18px; }
-:root[data-theme='swiss'] :is(.detail-header strong,.detail-title h2,.detail-subtitle,.detail-tabs>button,.section-label,.section-label>span,.metadata-row>span,.metadata-row>strong,.path-box>span,.path-box .text-button,.help-text,.detail-section p,.field,.file-entry,.file-entry small,.file-notice,.evidence-list,.local-member strong,.local-member span,.local-member small,.member-notes,.project-material-open h4,.project-material-cover>span,.project-material-evidence,.project-material-evidence summary,.project-material-evidence strong,.project-material-evidence span,.project-material-evidence small,.project-material-warnings,.project-material-scan-time,.candidate>strong,.candidate>span,.candidate-list>p,.source-link) { color: var(--swiss-ink); }
+:root[data-theme='swiss'] :is(.project-material-evidence) { color: var(--swiss-ink); }
+:root[data-theme='swiss'] :is(.detail-header strong, .detail-title h2, .detail-subtitle, .detail-tabs>button, .section-label, .section-label>span, .metadata-row>span, .metadata-row>strong, .path-box>span, .path-box .text-button, .help-text, .detail-section p, .field, .file-entry, .file-entry small, .file-notice, .evidence-list, .local-member strong, .local-member span, .local-member small, .member-notes, .project-material-open h4, .project-material-cover>span, .project-material-evidence summary, .project-material-evidence strong, .project-material-evidence span, .project-material-evidence small, .project-material-warnings, .project-material-scan-time, .candidate>strong, .candidate>span, .candidate-list>p, .source-link) { color: var(--swiss-ink); }
 :root[data-theme='swiss'] .detail-scroll { padding: 20px 18px 24px; }
 :root[data-theme='swiss'] .detail-cover { border: 1px solid var(--swiss-ink); background: var(--swiss-paper); }
 :root[data-theme='swiss'] .detail-title h2 { font-size: 23px; line-height: 1.35; letter-spacing: -.7px; }
@@ -174,7 +165,8 @@
 :root[data-theme='swiss'] :is(.compatibility-summary,.compatibility-legend,.compatibility-summary .absent-summary) { color: var(--swiss-ink); }
 :root[data-theme='swiss'] .relation-uncertain .project-material-relation { color: var(--swiss-red); background: transparent; border-color: var(--swiss-red); }
 :root[data-theme='swiss'] :is(.project-material-open,.project-material-cover,.candidate,.detail-candidate-cover) { background: transparent; color: var(--swiss-ink); border-color: var(--swiss-ink); }
-:root[data-theme='swiss'] :is(.candidate,.project-material-card) { padding: 12px 0; border-width: 1px 0 0; }
+:root[data-theme='swiss'] :is(.project-material-card) { padding: 12px 0; }
+:root[data-theme='swiss'] :is(.candidate) { padding: 12px 0; border-width: 1px 0 0; }
 :root[data-theme='swiss'] .project-material-evidence { margin-top: 12px; padding-top: 10px; }
 :root[data-theme='swiss'] .detail-candidate-cover { border: 1px solid var(--swiss-ink); }
 :root[data-theme='swiss'] .danger,:root[data-theme='swiss'] .error-text { color: var(--swiss-red) !important; background: transparent !important; }
@@ -185,7 +177,6 @@
 :root[data-theme='swiss'] .review-page { grid-column: 1/-1; display: flex; flex-direction: column; padding: 24px var(--swiss-gutter) 0; min-width: 0; overflow: hidden; }
 :root[data-theme='swiss'] .review-list { min-height: 0; overflow: auto; }
 :root[data-theme='swiss'] .review-page-toolbar { display: grid; grid-template-columns: repeat(12,minmax(0,1fr)); gap: 24px; padding-bottom: 20px; margin-bottom: 20px; border-bottom: 1px solid var(--swiss-ink); }
-:root[data-theme='swiss'] .review-page-caption { grid-column: span 5; }
 :root[data-theme='swiss'] .review-page-toolbar .review-toolbar-actions { grid-column: span 7; min-width: 0; justify-content: flex-start; gap: 8px; }
 :root[data-theme='swiss'] .review-page-toolbar strong { color: var(--swiss-ink); font-size: 19px; line-height: 1.3; letter-spacing: -.5px; }
 :root[data-theme='swiss'] .review-page-toolbar span { color: var(--swiss-ink); font-size: 9px; line-height: 1.8; }
@@ -209,7 +200,8 @@
 /* Account / downloads are the same index system, never a separate dark app. */
 :root[data-theme='swiss'] .booth-page { padding: 28px var(--swiss-gutter) 36px; }
 :root[data-theme='swiss'] .booth-page-introduction { align-items: flex-start; gap: 24px; margin-bottom: 40px; }
-:root[data-theme='swiss'] :is(.booth-wordmark,.booth-page h2,.booth-page h3,.booth-page-introduction p,.booth-browser-status,.booth-browser-status.active,.booth-entry-card strong,.booth-entry-card p,.booth-entry-arrow,.booth-session-note strong,.booth-session-note p,.booth-session-note>.text-button,.booth-download-location p,.booth-download-directory,.booth-download-location small,.booth-download-section-title span,.booth-download-section-title>strong,.booth-download-section-title>strong.downloading,.booth-download-heading strong,.booth-download-heading>span,.booth-download-metrics,.booth-download-metrics>span:nth-child(2),.booth-download-details,.booth-download-empty,.booth-download-empty>span,.booth-network-note) { color: var(--swiss-ink); }
+:root[data-theme='swiss'] :is(.booth-download-empty) { color: var(--swiss-ink); }
+:root[data-theme='swiss'] :is(.booth-wordmark, .booth-page h2, .booth-page h3, .booth-page-introduction p, .booth-browser-status, .booth-browser-status.active, .booth-entry-card strong, .booth-entry-card p, .booth-entry-arrow, .booth-session-note strong, .booth-session-note p, .booth-session-note>.text-button, .booth-download-location p, .booth-download-directory, .booth-download-location small, .booth-download-section-title span, .booth-download-section-title>strong, .booth-download-section-title>strong.downloading, .booth-download-heading strong, .booth-download-heading>span, .booth-download-metrics, .booth-download-metrics>span:nth-child(2), .booth-download-details, .booth-download-empty>span, .booth-network-note) { color: var(--swiss-ink); }
 :root[data-theme='swiss'] .booth-page h2 { font-size: 38px; line-height: 1.1; letter-spacing: -1.8px; margin: 12px 0; }
 :root[data-theme='swiss'] .booth-entry-grid { display: grid; grid-template-columns: repeat(12,minmax(0,1fr)); gap: 0 24px; counter-reset: swiss-booth; }
 :root[data-theme='swiss'] .booth-entry-card { grid-column: span 6; padding: 22px 0 30px; gap: 18px; background: transparent; border: 0; border-top: 1px solid var(--swiss-ink); counter-increment: swiss-booth; }
@@ -218,17 +210,19 @@
 :root[data-theme='swiss'] .booth-entry-icon::before { content: counter(swiss-booth,decimal-leading-zero); display: block; font-size: 19px; font-weight: 700 !important; letter-spacing: -.5px; line-height: 1.2; }
 :root[data-theme='swiss'] .booth-entry-card strong { font-size: 19px; line-height: 1.3; letter-spacing: -.5px; }
 :root[data-theme='swiss'] .booth-entry-card p { font-size: 10px; line-height: 1.8; margin-top: 12px; }
-:root[data-theme='swiss'] :is(.booth-download-location,.booth-download-row,.booth-download-empty,.booth-read-error,.booth-network-note) { background: transparent; border: 1px solid var(--swiss-ink); }
+:root[data-theme='swiss'] :is(.booth-download-location, .booth-download-row, .booth-download-empty) { background: transparent; }
+:root[data-theme='swiss'] :is(.booth-read-error, .booth-network-note) { background: transparent; border: 1px solid var(--swiss-ink); }
 :root[data-theme='swiss'] .booth-download-location { padding: 20px; margin-top: 30px; }
 :root[data-theme='swiss'] .booth-download-section { margin-top: 40px; }
-:root[data-theme='swiss'] .booth-download-row { padding: 20px 0; border-width: 1px 0 0; }
+:root[data-theme='swiss'] .booth-download-row { padding: 20px 0; }
 :root[data-theme='swiss'] .booth-download-progress { height: 3px; background: var(--swiss-ink); }
 :root[data-theme='swiss'] .booth-download-progress i { background: var(--swiss-red); }
 :root[data-theme='swiss'] .download-completed .booth-download-progress i { background: var(--swiss-ink); }
 :root[data-theme='swiss'] .booth-download-empty { align-items: flex-start; justify-content: flex-start; padding: 28px; }
 
 /* Live network dashboard: black rules, one red data series. */
-:root[data-theme='swiss'] :is(.network-panel,.download-summary,.speed-chart-panel,.download-stat-grid>div,.active-transfer,.transfer-entry,.proxy-state,.network-empty,.latest-download,.source-undo-banner,.recovery-banner,.activity-strip,.selection-bar) { background: transparent; border-color: var(--swiss-ink); color: var(--swiss-ink); }
+:root[data-theme='swiss'] :is(.speed-chart-panel, .download-stat-grid>div, .network-empty) { background: transparent; color: var(--swiss-ink); }
+:root[data-theme='swiss'] :is(.network-panel, .download-summary, .active-transfer, .transfer-entry, .proxy-state, .latest-download, .source-undo-banner, .recovery-banner, .activity-strip, .selection-bar) { background: transparent; border-color: var(--swiss-ink); color: var(--swiss-ink); }
 :root[data-theme='swiss'] .network-panel { margin: 0 var(--swiss-gutter) 16px; padding: 12px 0; border-width: 1px 0; }
 :root[data-theme='swiss'] :is(.download-summary-status>strong,.download-session-stats,.download-session-stats b,.network-traffic span,.network-traffic strong,.download-summary .network-traffic strong,.network-status,.network-status.receiving,.latest-download-badge,.latest-download-name,.latest-download-data,.proxy-state strong,.proxy-state span,.proxy-state small,.proxy-endpoint,.chart-heading strong,.chart-heading span,.chart-peak,.chart-peak b,.chart-legend,.chart-legend small,.download-stat-grid span,.download-stat-grid strong,.download-stat-grid small,.download-controls>span,.download-section-heading h3,.download-section-heading h3 span,.download-section-heading>span,.request-kind,.request-phase,.active-transfer-name,.network-url,.network-progress-row>span,.active-transfer-footer,.transfer-entry-content strong,.transfer-entry-content small,.transfer-entry-metrics strong,.transfer-entry-metrics small,.history-explanation,.download-modal-footer>span,.concurrency-select,.source-undo-button,.source-undo-button.compact>small,.source-undo-banner strong,.source-undo-banner span,.source-undo-banner small,.selection-bar label,.selection-bar button,.activity-strip strong,.activity-strip span) { color: var(--swiss-ink); }
 :root[data-theme='swiss'] :is(.network-status,.history-icon,.history-icon.cached,.modal-symbol,.latest-download-badge,.request-kind) { background: transparent; color: var(--swiss-ink); }
@@ -244,7 +238,7 @@
 :root[data-theme='swiss'] .network-progress>span { background: var(--swiss-red); }
 :root[data-theme='swiss'] .active-transfer.phase-complete .network-progress>span { background: var(--swiss-ink); }
 :root[data-theme='swiss'] :is(.download-stat-grid,.active-transfer-grid) { display: grid; grid-template-columns: repeat(12,minmax(0,1fr)); gap: 24px; }
-:root[data-theme='swiss'] .download-stat-grid>div { grid-column: span 3; border: 0; border-top: 1px solid var(--swiss-ink); padding: 18px 0; }
+:root[data-theme='swiss'] .download-stat-grid>div { grid-column: span 3; padding: 18px 0; }
 :root[data-theme='swiss'] .active-transfer-grid>.active-transfer { grid-column: span 6; border-width: 1px 0 0; padding: 18px 0; }
 :root[data-theme='swiss'] .download-stat-grid strong { font-size: 25px; line-height: 1.2; }
 :root[data-theme='swiss'] .download-section-heading { border-color: var(--swiss-ink); }
@@ -290,7 +284,6 @@
   :root[data-theme='swiss'] .detail-panel { grid-column: span 5; }
   :root[data-theme='swiss'] .has-detail .asset-grid.view-grid>.asset-card { grid-column: span 6; }
   :root[data-theme='swiss'] .has-detail .asset-grid.view-grid.density-spacious>.asset-card { grid-column: span 12; }
-  :root[data-theme='swiss'] .review-page-caption { grid-column: span 12; }
   :root[data-theme='swiss'] .review-page-toolbar .review-toolbar-actions { grid-column: span 12; margin: 0; }
   :root[data-theme='swiss'] .review-local { grid-column: span 5; padding-right: 16px; }
   :root[data-theme='swiss'] :is(.review-candidates,.review-no-candidates) { grid-column: span 7; }
@@ -363,7 +356,6 @@
 @media(max-height:650px) {
   :root[data-theme='swiss'] .topbar { min-height: 104px; padding-top: 18px; padding-bottom: 18px; }
   :root[data-theme='swiss'] .workspace-title h1 { font-size: 40px; }
-  :root[data-theme='swiss'] .theme-identity { padding-bottom: 16px; gap: 4px; }
   :root[data-theme='swiss'] .sidebar { padding-top: 18px; }
   :root[data-theme='swiss'] .brand { padding-bottom: 16px; margin-bottom: 14px; }
   :root[data-theme='swiss'] :is(.category-label,.collection-label) { margin-top: 18px; }
@@ -387,10 +379,8 @@ html[data-theme="swiss"] .review-candidate-cover:disabled {opacity:1}
 
 /* High zoom uses compact controls so the archive keeps a visible working area. */
 @media(max-height:560px){
- :root[data-theme='swiss'] .theme-station{padding:5px 0;gap:8px}
  :root[data-theme='swiss'] .module-id{font-size:14px;line-height:1.2}
  :root[data-theme='swiss'] .module-title{font-size:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
- :root[data-theme='swiss'] .theme-footer{padding:3px 0;font-size:8px;line-height:1.4;gap:8px}
  :root[data-theme='swiss'] .topbar{min-height:0;padding:9px var(--swiss-gutter);gap:7px}
  :root[data-theme='swiss'] .workspace-title{flex-basis:100%}
  :root[data-theme='swiss'] .workspace-title h1{font-size:36px;line-height:1.05}
@@ -402,7 +392,6 @@ html[data-theme="swiss"] .review-candidate-cover:disabled {opacity:1}
  :root[data-theme='swiss'] .filter-row>*{flex-shrink:0}
  :root[data-theme='swiss'] .filter-row::-webkit-scrollbar{height:4px}
  :root[data-theme='swiss'] .filter-row select{font-size:9px;padding:4px 2px}
- :root[data-theme='swiss'] .result-caption{display:none}
  :root[data-theme='swiss'] .network-panel{margin-top:4px;margin-bottom:5px}
  :root[data-theme='swiss'] .download-summary-top{min-height:0;padding:5px 0;gap:8px}
  :root[data-theme='swiss'] .network-traffic{gap:8px}

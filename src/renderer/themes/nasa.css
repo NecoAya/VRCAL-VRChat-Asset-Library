@@ -69,64 +69,6 @@ html[data-theme="nasa"] .brand span {
   letter-spacing: .7px;
   color: #62665d;
 }
-html[data-theme="nasa"] .theme-identity {
-  position: relative;
-  flex-shrink: 0;
-  border: 1px solid #91978a;
-  border-radius: 2px;
-  margin: 0 5px 23px;
-  padding: 14px 13px 12px;
-  background: #f3eedf;
-  box-shadow: 1px 2px 0 #ccd0c1;
-}
-html[data-theme="nasa"] .theme-identity::before,
-html[data-theme="nasa"] .theme-identity::after {
-  content: "";
-  position: absolute;
-  top: 5px;
-  width: 4px;
-  height: 4px;
-  border: 1px solid #7c8175;
-  border-radius: 50%;
-  background: #e4e4d6;
-  pointer-events: none;
-}
-html[data-theme="nasa"] .theme-identity::before { left: 5px; }
-html[data-theme="nasa"] .theme-identity::after { right: 5px; }
-html[data-theme="nasa"] .theme-kicker {
-  display: block;
-  font: 9px/1.5 var(--nasa-mono);
-  color: #62665d;
-  letter-spacing: 1.4px;
-  text-transform: uppercase;
-}
-html[data-theme="nasa"] .theme-wordmark {
-  display: block;
-  margin: 5px 0 3px;
-  font-family: "Arial Black", "Helvetica Neue", Helvetica, sans-serif;
-  font-size: clamp(20px, 1.65vw, 29px);
-  font-weight: 700;
-  letter-spacing: -1px;
-  line-height: 1.05;
-  text-transform: uppercase;
-}
-html[data-theme="nasa"] .theme-subtitle {
-  display: block;
-  font: 9px/1.7 var(--nasa-mono);
-  color: #62665d;
-  letter-spacing: .45px;
-}
-html[data-theme="nasa"] .theme-band {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  height: 7px;
-  overflow: hidden;
-  margin-top: 12px;
-}
-html[data-theme="nasa"] .theme-band > span:nth-child(1) { background: #4c5a68; }
-html[data-theme="nasa"] .theme-band > span:nth-child(2) { background: #7a7f4e; }
-html[data-theme="nasa"] .theme-band > span:nth-child(3) { background: #d2a85e; }
-html[data-theme="nasa"] .theme-band > span:nth-child(4) { background: #a8432f; }
 html[data-theme="nasa"] .sidebar-label {
   margin-bottom: 7px;
   padding-left: 11px;
@@ -176,24 +118,8 @@ html[data-theme="nasa"] .category-item.active {
 html[data-theme="nasa"] .category-item small { color: #7c8175; font-family: var(--nasa-mono); }
 html[data-theme="nasa"] .category-dot { width: 4px; height: 4px; border-radius: 0; background: #7c8175; }
 html[data-theme="nasa"] .collection-edit { color: #62665d; border-radius: 1px; }
-html[data-theme="nasa"] .source-note {
-  border-top: 1px solid #bbc0b1;
-  color: #62665d;
-  font-family: var(--nasa-mono);
-  line-height: 1.7;
-}
 html[data-theme="nasa"] .safe-dot { background: #7c8175; border-radius: 1px; }
 html[data-theme="nasa"] .tiny-pill { border-color: #a7ad9e; color: #62665d; border-radius: 1px; }
-html[data-theme="nasa"] .theme-annotation {
-  margin: 8px 9px 9px;
-  padding: 6px 9px 7px;
-  color: #62665d;
-  background: #f7efd4;
-  border: 1px solid #ccd0c1;
-  font: 11px/1.55 "Segoe Print", "KaiTi", "Microsoft YaHei UI", cursive;
-  transform: rotate(-2deg);
-  box-shadow: 1px 2px 0 #ccd0c1;
-}
 
 /* Instrument header and quiet, generous working area. */
 html[data-theme="nasa"] .workspace { background: #ece5d6; }
@@ -219,30 +145,6 @@ html[data-theme="nasa"] .workspace-title h1 > span {
   background: #e4e4d6;
   border: 1px solid #bbc0b1;
   border-radius: 1px;
-}
-html[data-theme="nasa"] .theme-station {
-  display: flex;
-  flex-wrap: wrap;
-  flex-shrink: 0;
-  min-height: 40px;
-  padding: 7px 25px;
-  gap: 5px 12px;
-  align-items: baseline;
-  background: #ece5d6;
-  border-bottom: 1px solid #b7b0a2;
-  color: #62665d;
-  font: 9px/1.5 var(--nasa-mono);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-html[data-theme="nasa"] .theme-station .module-id { color: #d63a2c; font-weight: 700; }
-html[data-theme="nasa"] .theme-station .module-title { color: #62665d; }
-html[data-theme="nasa"] .theme-station .theme-annotation {
-  margin: 0 0 0 auto;
-  padding: 3px 9px;
-  font-size: 10px;
-  letter-spacing: 0;
-  text-transform: none;
 }
 html[data-theme="nasa"] .breadcrumb { color: #7c8175; font: 10px/1.6 var(--nasa-mono); }
 html[data-theme="nasa"] .breadcrumb strong { color: #414741; }
@@ -272,13 +174,6 @@ html[data-theme="nasa"] .search-field {
 }
 html[data-theme="nasa"] .search-field:focus-within { border-color: #414741; box-shadow: inset 2px 0 0 #414741; }
 html[data-theme="nasa"] .search-field input { color: #414741; font-size: 12px; }
-html[data-theme="nasa"] .search-field kbd {
-  color: #7c8175;
-  background: #ece5d6;
-  border-color: #ccd0c1;
-  border-radius: 1px;
-  font-family: var(--nasa-mono);
-}
 html[data-theme="nasa"] .filter-row { min-height: 47px; column-gap: 8px; }
 html[data-theme="nasa"] :is(.filter-row select, .concurrency-select select, .download-section-heading select, .review-sort-label select, .zoom-actions select) {
   background: #ece5d6;
@@ -291,32 +186,6 @@ html[data-theme="nasa"] :is(.filter-row select, .concurrency-select select, .dow
 html[data-theme="nasa"] .content-layout { border-top: 1px solid #bbc0b1; position: relative; }
 html[data-theme="nasa"] .gallery-scroll { padding: 23px 25px 18px; }
 html[data-theme="nasa"] :is(.result-caption, .gallery-footnote, .search-boundary, .help-text) { color: #7c8175; }
-html[data-theme="nasa"] .search-boundary::before { background: #a7ad9e; }
-html[data-theme="nasa"] .theme-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 15px;
-  flex-shrink: 0;
-  position: relative;
-  min-height: 25px;
-  padding: 6px 25px 5px;
-  border-top: 1px solid #bbc0b1;
-  background: #e4e4d6;
-  color: #62665d;
-  font: 8px/1.5 var(--nasa-mono);
-  letter-spacing: .8px;
-}
-html[data-theme="nasa"] .theme-footer::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 8px;
-  background: repeating-linear-gradient(135deg, #414741 0 3px, #f3eedf 3px 6px);
-  pointer-events: none;
-}
 
 /* Pressed controls, one saturated signal colour. */
 html[data-theme="nasa"] .button {
@@ -400,7 +269,6 @@ html[data-theme="nasa"] .card-avatars { color: #62665d; }
 html[data-theme="nasa"] .card-search-evidence { color: #7c8175; background: #ece5d6; }
 html[data-theme="nasa"] .card-footer {
   color: #7c8175;
-  border-top: 1px solid #dbddce;
   padding-top: 8px;
   font-family: var(--nasa-mono);
   font-size: 9px;
@@ -437,11 +305,9 @@ html[data-theme="nasa"] .cover-placeholder {
 }
 html[data-theme="nasa"] .cover-placeholder > svg { color: #91978a; opacity: .68; }
 html[data-theme="nasa"] .cover-placeholder > span { font-family: var(--nasa-mono); color: #7c8175; letter-spacing: 1px; }
-html[data-theme="nasa"] .placeholder-orbit { border-color: #ccd0c1; border-radius: 0; transform: rotate(-20deg); opacity: .4; }
-html[data-theme="nasa"] .placeholder-orbit::after { background: #91978a; box-shadow: none; }
 html[data-theme="nasa"] .view-list .asset-card { border-radius: 1px; padding: 10px; border-bottom-color: #bbc0b1; box-shadow: none; }
 html[data-theme="nasa"] .view-list .card-cover { border: 1px solid #ccd0c1; border-radius: 1px; }
-html[data-theme="nasa"] .view-list .card-footer { border-top: 0; padding-top: 0; }
+html[data-theme="nasa"] .view-list .card-footer { padding-top: 0; }
 html[data-theme="nasa"] :is(.empty-symbol, .empty-state h2, .review-empty > h3) { color: #62665d; }
 
 /* Details, the confirmation bench, and the project inventory. */
@@ -465,7 +331,13 @@ html[data-theme="nasa"] .detail-tabs > button.active { color: #414741; border-co
 html[data-theme="nasa"] .detail-section { border-color: #ccd0c1; padding-top: 16px; }
 html[data-theme="nasa"] :is(.detail-subtitle, .metadata-row > span, .file-entry > small, .local-member small, .hover-author) { color: #7c8175; }
 html[data-theme="nasa"] :is(.metadata-row > strong, .file-entry > span, .local-member strong, .evidence-list strong) { color: #565d55; }
-html[data-theme="nasa"] :is(.path-box, .setting-path) {
+html[data-theme="nasa"] :is(.path-box) {
+  background: #e4e4d6;
+  color: #62665d;
+  border-radius: 1px;
+  font-family: var(--nasa-mono);
+}
+html[data-theme="nasa"] :is(.setting-path) {
   background: #e4e4d6;
   color: #62665d;
   border: 1px solid #ccd0c1;
@@ -476,7 +348,8 @@ html[data-theme="nasa"] .path-box > span { color: #62665d; }
 html[data-theme="nasa"] .file-entry { border-color: #dbddce; }
 html[data-theme="nasa"] .source-link { color: #565d55; background: #ece5d6; border-color: #ccd0c1; border-radius: 1px; }
 html[data-theme="nasa"] .source-link:hover { color: #414741; background: #e4e4d6; }
-html[data-theme="nasa"] :is(.candidate, .local-member, .project-material-card) { background: #f3eedf; border: 1px solid #ccd0c1; border-radius: 2px; }
+html[data-theme="nasa"] :is(.project-material-card) { background: #f3eedf; border-radius: 2px; }
+html[data-theme="nasa"] :is(.candidate, .local-member) { background: #f3eedf; border: 1px solid #ccd0c1; border-radius: 2px; }
 html[data-theme="nasa"] :is(.candidate > strong, .project-material-open h4, .hover-content h3) { color: #565d55; }
 html[data-theme="nasa"] :is(.candidate > span, .project-material-scan-time, .project-material-evidence span, .local-member span) { color: #7c8175; }
 html[data-theme="nasa"] .compatibility-avatar { background: #ece5d6; color: #62665d; border: 1px solid #bbc0b1; border-radius: 1px; }
@@ -485,7 +358,7 @@ html[data-theme="nasa"] .compatibility-avatar.absent { background: #ece5d6; colo
 html[data-theme="nasa"] :is(.compatibility-legend .local-dot, .compatibility-legend i) { background: #7c8175; border-radius: 0; }
 html[data-theme="nasa"] .compatibility-legend i:not(.local-dot) { background: #ccd0c1; }
 html[data-theme="nasa"] :is(.compatibility-summary, .compatibility-legend, .evidence-list, .evidence-list > summary, .member-notes, .member-notes summary) { color: #62665d; }
-html[data-theme="nasa"] .project-material-evidence { color: #62665d; border-color: #ccd0c1; }
+html[data-theme="nasa"] .project-material-evidence { color: #62665d; }
 html[data-theme="nasa"] .project-material-evidence summary { color: #62665d; }
 html[data-theme="nasa"] .project-material-cover { background: #ece5d6; border-radius: 1px; }
 html[data-theme="nasa"] .project-material-relation { color: #62665d; background: #ece5d6; border: 1px solid #ccd0c1; border-radius: 1px; }
@@ -549,7 +422,8 @@ html[data-theme="nasa"] .network-status.receiving { color: #f7f2e6; background: 
 html[data-theme="nasa"] :is(.network-traffic strong, .download-session-stats b, .download-summary-status > strong, .download-stat-grid strong, .download-stat-grid > div:last-child strong) { color: #565d55; font-family: var(--nasa-mono); font-weight: 700; }
 html[data-theme="nasa"] :is(.network-traffic > div:last-child strong, .latest-download-data, .download-modal .transfer-entry-metrics strong) { color: #4c5a68; }
 html[data-theme="nasa"] :is(.network-traffic span, .network-note, .network-material, .network-request, .network-url, .download-session-stats, .latest-download-name, .network-progress-row > span, .network-history, .download-heading p) { color: #7c8175; }
-html[data-theme="nasa"] :is(.latest-download, .proxy-state, .download-stat-grid > div, .speed-chart-panel, .active-transfer) { background: #f3eedf; border: 1px solid #ccd0c1; border-radius: 1px; box-shadow: none; }
+html[data-theme="nasa"] :is(.download-stat-grid > div, .speed-chart-panel) { background: #f3eedf; border-radius: 1px; box-shadow: none; }
+html[data-theme="nasa"] :is(.latest-download, .proxy-state, .active-transfer) { background: #f3eedf; border: 1px solid #ccd0c1; border-radius: 1px; box-shadow: none; }
 html[data-theme="nasa"] .latest-download-badge { background: #e4e4d6; color: #62665d; border-radius: 1px; }
 html[data-theme="nasa"] .proxy-status-dot { background: #91978a; border-radius: 1px; }
 html[data-theme="nasa"] .proxy-state.proxy-available .proxy-status-dot { background: #91978a; }
@@ -595,7 +469,7 @@ html[data-theme="nasa"] :is(.booth-download-directory, .booth-download-location 
 html[data-theme="nasa"] .download-completed .booth-download-progress i { background: #7a7f4e; }
 html[data-theme="nasa"] .download-completed .booth-download-heading > span { color: #7c8175; }
 html[data-theme="nasa"] :is(.download-failed, .download-interrupted) .booth-download-heading > span { color: #a43b29; }
-html[data-theme="nasa"] .booth-download-empty { color: #91978a; border-color: #ccd0c1; border-radius: 1px; }
+html[data-theme="nasa"] .booth-download-empty { color: #91978a; border-radius: 1px; }
 html[data-theme="nasa"] .booth-download-empty > span { color: #a7ad9e; }
 html[data-theme="nasa"] .booth-network-note { color: #7c8175; background: #ece5d6; border-color: #ccd0c1; border-radius: 1px; }
 html[data-theme="nasa"] .booth-read-error { color: #8c4330; background: #ece5d6; border-color: #bbc0b1; border-radius: 1px; }
@@ -649,8 +523,6 @@ html[data-theme="nasa"] .toast .icon-button { color: inherit; }
    Functional controls and content are never hidden to accommodate decoration. */
 @media (max-width: 1200px) {
   html[data-theme="nasa"] .sidebar { --sidebar: 205px; padding-right: 11px; padding-left: 11px; }
-  html[data-theme="nasa"] .theme-identity { margin-bottom: 17px; padding-right: 10px; padding-left: 10px; }
-  html[data-theme="nasa"] .theme-wordmark { font-size: 23px; }
   html[data-theme="nasa"] .topbar { padding-right: 19px; padding-left: 19px; }
   html[data-theme="nasa"] .filter-area { margin-right: 19px; margin-left: 19px; }
   html[data-theme="nasa"] :is(.gallery-scroll, .review-page, .booth-page) { padding-right: 19px; padding-left: 19px; }
@@ -663,35 +535,19 @@ html[data-theme="nasa"] .toast .icon-button { color: inherit; }
   html[data-theme="nasa"] .brand-mark { width: 32px; height: 32px; }
   html[data-theme="nasa"] .brand strong { font-size: 13px; }
   html[data-theme="nasa"] .brand span { font-size: 8px; }
-  html[data-theme="nasa"] .theme-identity { padding: 11px 9px 9px; margin: 0 4px 14px; }
-  html[data-theme="nasa"] .theme-wordmark { font-size: 19px; }
-  html[data-theme="nasa"] .theme-kicker { font-size: 8px; letter-spacing: .8px; }
-  html[data-theme="nasa"] .theme-subtitle { font-size: 8px; }
-  html[data-theme="nasa"] .theme-band { height: 5px; margin-top: 8px; }
   html[data-theme="nasa"] .topbar { min-height: 64px; padding: 10px 15px; }
   html[data-theme="nasa"] .filter-area { margin: 13px 15px 0; }
   html[data-theme="nasa"] :is(.gallery-scroll, .review-page, .booth-page) { padding-right: 15px; padding-left: 15px; }
-  html[data-theme="nasa"] .theme-footer { padding-right: 15px; padding-left: 15px; font-size: 7px; }
-  html[data-theme="nasa"] .theme-annotation { font-size: 10px; padding: 5px 7px; }
   html[data-theme="nasa"] .category-label { margin-top: 14px; padding-top: 13px; }
 }
 @media (max-height: 730px) {
   html[data-theme="nasa"] .sidebar { padding-top: 14px; }
-  html[data-theme="nasa"] .theme-identity { padding-top: 11px; padding-bottom: 9px; margin-bottom: 13px; }
   html[data-theme="nasa"] .brand { padding-bottom: 13px; }
-  html[data-theme="nasa"] .theme-wordmark { font-size: 22px; }
-  html[data-theme="nasa"] .theme-band { height: 5px; margin-top: 8px; }
   html[data-theme="nasa"] .topbar { min-height: 61px; padding-top: 9px; padding-bottom: 9px; }
-  html[data-theme="nasa"] .theme-annotation { margin-top: 5px; margin-bottom: 5px; padding-top: 3px; padding-bottom: 4px; }
-  html[data-theme="nasa"] .theme-footer { min-height: 20px; padding-top: 3px; padding-bottom: 3px; }
 }
 @media (max-height: 500px) {
   html[data-theme="nasa"] .sidebar { padding-top: 10px; padding-bottom: 7px; }
   html[data-theme="nasa"] .brand { padding-bottom: 7px; }
-  html[data-theme="nasa"] .theme-identity { margin-bottom: 8px; padding-top: 9px; padding-bottom: 7px; }
-  html[data-theme="nasa"] .theme-wordmark { font-size: 18px; margin-top: 3px; }
-  html[data-theme="nasa"] .theme-subtitle { line-height: 1.3; }
-  html[data-theme="nasa"] .theme-band { height: 4px; margin-top: 6px; }
   html[data-theme="nasa"] .nav-item { min-height: 33px; }
   html[data-theme="nasa"] .topbar { min-height: 52px; padding-top: 7px; padding-bottom: 7px; }
   html[data-theme="nasa"] .filter-area { margin-top: 10px; }

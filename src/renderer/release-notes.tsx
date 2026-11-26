@@ -32,7 +32,7 @@ export function ReleaseNotesContent({currentVersion}:{currentVersion?:string}) {
   return <section className="release-page" aria-label={t('更新记录')}>
     <div className="release-content">
       <header className="release-intro">
-        <div><h2>{t('版本时间线')}</h2><p>{t('记录随程序保存，断网也能查看。')}</p></div>
+        <h2>{t('版本时间线')}</h2>
         <div className="release-running"><span>{t('当前运行')}</span><strong>{currentVersion===undefined?'…':currentVersion||t('版本暂不可用')}</strong></div>
       </header>
       <div className="release-controls">
@@ -44,11 +44,10 @@ export function ReleaseNotesContent({currentVersion}:{currentVersion?:string}) {
       <p className="release-count" role="status">{t('共 {count} 个版本',{count:entries.length})}</p>
       {entries.length ? <div className="release-timeline">{entries.map(entry=><article className="release-card" key={entry.version} data-release-version={entry.version} data-running={entry.version===currentVersion?'true':undefined}>
         <header className="release-card-header">
-          <div className="release-version"><strong>v{entry.version}</strong><span className={`release-channel channel-${entry.channel}`}>{t(channelLabels[entry.channel])}</span>{entry.version===currentVersion&&<span className="release-current">{t('当前运行')}</span>}</div>
+          <div className="release-version"><strong>v{entry.version}</strong><span className={`release-channel channel-${entry.channel}`} title={entry.channel==='local'?t('本地试验版，尚未发布到 GitHub。'):undefined}>{t(channelLabels[entry.channel])}</span>{entry.version===currentVersion&&<span className="release-current">{t('当前运行')}</span>}</div>
           <time dateTime={entry.date}>{displayDate(entry.date)}</time>
         </header>
         <h3>{t(entry.title)}</h3>
-        {entry.channel==='local'&&<p className="release-trial-note">{t('本地试验版，尚未发布到 GitHub。')}</p>}
         <div className="release-sections">{entry.sections.map(section=><section className={`release-section kind-${section.kind}`} key={section.kind}>
           <h4>{t(sectionLabels[section.kind])}</h4><ul>{section.items.map(item=><li key={item}>{t(item)}</li>)}</ul>
         </section>)}</div>

@@ -1,5 +1,8 @@
 // Translation deferred at the user's request. Keep Chinese until the final language pass.
 export const LINK_INBOX_MESSAGES:Record<string,readonly [string,string]> = {
+  "闲鱼消息和完整后台发现仍待验证。": ["闲鱼消息和完整后台发现仍待验证。", "闲鱼消息和完整后台发现仍待验证。"],
+  "请登录平台账号并开启交付链接识别。": ["请登录平台账号并开启交付链接识别。", "请登录平台账号并开启交付链接识别。"],
+  "百度下载需先在下方登录。": ["百度下载需先在下方登录。", "百度下载需先在下方登录。"],
   "本地测试：BOOTH 已登录资料库可识别条目，时间不明的只放入待核对；闲鱼消息和完整后台发现仍待验证。百度网盘链接下载可独立使用。": ["本地测试：BOOTH 已登录资料库可识别条目，时间不明的只放入待核对；闲鱼消息和完整后台发现仍待验证。百度网盘链接下载可独立使用。", "本地测试：BOOTH 已登录资料库可识别条目，时间不明的只放入待核对；闲鱼消息和完整后台发现仍待验证。百度网盘链接下载可独立使用。"],
   "使用协议与隐私说明": ["使用协议与隐私说明", "使用协议与隐私说明"],
   "完整文档随程序附带：docs/USER_AGREEMENT.zh-CN.md、docs/PRIVACY.zh-CN.md。": ["完整文档随程序附带：docs/USER_AGREEMENT.zh-CN.md、docs/PRIVACY.zh-CN.md。", "完整文档随程序附带：docs/USER_AGREEMENT.zh-CN.md、docs/PRIVACY.zh-CN.md。"],

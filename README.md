@@ -52,6 +52,8 @@
 
 ## 本次更新与更新记录
 
+**1.4.2-preview.1：界面精简。** 清理装饰小字、重复说明和多层边框，保留关键操作、状态与提示。纳入此前合并的自定义 AI 服务商。[预览版说明](docs/RELEASE_1.4.2-preview.1.zh-CN.md) · [预览版下载](https://github.com/NecoAya/VRCAL-VRChat-Asset-Library/releases/tag/v1.4.2-preview.1)。
+
 **1.4.1：Prefab 只读组合预览与百度下载提示。** 正式版纳入 Prefab 贡献及后续边界修复；保留 KelierAndes 署名。百度下载统一 45 秒启动等待、细分失败原因，并可主动查看应用内下载页面；仍不承诺真实账号或所有分享下载已修复。[正式版说明](docs/RELEASE_1.4.1.zh-CN.md)。此前诊断预览说明作为历史记录保留。
 
 **1.4.0：汇总 1.3.0 以来的素材整理、下载和工程更新。** [完整正式版说明](docs/RELEASE_1.4.0.zh-CN.md)保留各功能的使用及验证边界，preview.5–17 的原始开发记录继续收录于 CHANGELOG 和应用内历史。

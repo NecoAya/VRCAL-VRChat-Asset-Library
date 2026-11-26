@@ -31,5 +31,5 @@ test('a local image can be compared without claiming that any product candidate 
 test('the actual local preview renders a named modal and a keyboard scroll region without confirmation controls',()=>{
  const $=load(renderToStaticMarkup(React.createElement(LocalReviewImagePreview,{image:'manual local.png',name:'Local material name',onClose(){}}))),dialog=$('[role="dialog"]');
  assert.equal(dialog.attr('aria-modal'),'true');assert.equal(dialog.attr('aria-label'),'本地图片预览');assert.equal(dialog.find('img').attr('src'),'library-cover://cache/manual%20local.png');assert.equal(dialog.find('[role="region"][tabindex="0"]').length,1);
- assert.equal(dialog.find('button').length,1);assert.equal(dialog.find('button').attr('aria-label'),'关闭本地图片预览');assert.equal(dialog.find('[data-review-action="accept"],[data-candidate-url]').length,0);assert(dialog.text().includes('仅供对照，不会确认商品来源'));
+ assert.equal(dialog.find('button').length,1);assert.equal(dialog.find('button').attr('aria-label'),'关闭本地图片预览');assert.equal(dialog.find('[data-review-action="accept"],[data-candidate-url]').length,0);
 });

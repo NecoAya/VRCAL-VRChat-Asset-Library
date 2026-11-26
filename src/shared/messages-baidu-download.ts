@@ -1,4 +1,11 @@
 export const BAIDU_DOWNLOAD_MESSAGES:Record<string,readonly [string,string]> = {
+  "暂无下载记录": ["No downloads yet", "ダウンロード履歴はありません"],
+  "自动解压仅支持 ZIP，失败时保留原压缩包。": ["Only ZIP files are extracted automatically. If extraction fails, the original archive is kept.", "自動展開は ZIP 形式のみ対応しています。失敗した場合は元のアーカイブを保持します。"],
+  "各压缩包解压到独立子目录。": ["Each archive is extracted into its own subfolder.", "各アーカイブは個別のサブフォルダーに展開されます。"],
+  "下载完成后自动入库。同一分享中识别为同一商品的文件会一并保存。": ["Completed downloads are added to the library. Files in the same share that match the same product are saved together.", "ダウンロード完了後、自動でライブラリに追加されます。同じ共有内で同一商品と判断されたファイルはまとめて保存されます。"],
+  "{count} 个条目": ["{count} entries", "{count} 件"],
+  "每次最多可选 100 个文件": ["Select up to 100 files at a time", "一度に最大 100 ファイルまで選択できます"],
+  "同一素材的 ZIP 可以一起解压并入库，支持离线操作。": ["Extract ZIP files for the same asset together and add them to the library. This also works offline.", "同じ素材の ZIP をまとめて展開し、ライブラリに追加できます。オフラインでも操作できます。"],
   "打开文件夹": ["Open folder", "フォルダーを開く"],
   "最近下载进度": ["Latest download progress", "最新のダウンロード進捗"],
   "百度网盘链接下载": [

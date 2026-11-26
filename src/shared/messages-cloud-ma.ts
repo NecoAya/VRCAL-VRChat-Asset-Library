@@ -1,4 +1,5 @@
 export const CLOUD_MA_MESSAGES:Record<string,readonly [string,string]> = {
+  "先在百度网页打开要读取的文件夹。这里只记录文件列表。": ["Open the folder on Baidu first. Only the file list is recorded here.", "先に百度のウェブページで対象フォルダーを開いてください。ここではファイル一覧のみ記録します。"],
   "Unity 未确认 MA 装配结果，请检查助手版本及场景；不会自动重复装配。": ["Unity did not confirm MA assembly. Check the helper version and scene; assembly will not repeat automatically.", "Unity から MA 組み付けの完了を確認できません。ヘルパーのバージョンとシーンを確認してください。自動で繰り返すことはありません。"],
   "用于装配的 Prefab": ["Prefab used for setup", "組み付けに使用した Prefab"],
   "文件夹": [

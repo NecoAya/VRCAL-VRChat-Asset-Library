@@ -147,7 +147,7 @@ html:is([data-theme='x'],[data-theme='x-light']) .card-body { padding: 14px 14px
 html:is([data-theme='x'],[data-theme='x-light']) .card-body h3 { font-size: 14px; line-height: 21px; height: 42px; }
 html:is([data-theme='x'],[data-theme='x-light']) .card-author { color: var(--muted); font-size: 12px; line-height: 18px; height: 18px; }
 html:is([data-theme='x'],[data-theme='x-light']) :is(.card-avatars,.card-footer,.card-search-evidence) { font-size: 11px; }
-html:is([data-theme='x'],[data-theme='x-light']) .card-tags>span { background: var(--panel); color: var(--muted); font-size: 11px; border-radius: 999px; }
+html:is([data-theme='x'],[data-theme='x-light']) .card-tags>span { color: var(--muted); font-size: 11px; }
 html:is([data-theme='x'],[data-theme='x-light']) :is(.card-category,.card-badge,.card-favorite,.cover-change,.review-cover-action) { border-radius: 999px; }
 html:is([data-theme='x'],[data-theme='x-light']) .card-select input:checked+span { background: var(--accent); border-color: var(--accent); color: var(--accent-contrast); }
 html:is([data-theme='x'],[data-theme='x-light']) .is-favorite { color: var(--accent) !important; }

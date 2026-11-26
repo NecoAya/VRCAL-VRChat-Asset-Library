@@ -193,7 +193,7 @@ test('individual removal retains its accessible hook, manual-source badge and un
   assert.equal(remove.props['aria-label'], '移除素材路径：' + A);
   assert(text(h.tree).includes('手动添加'));
   assert(text(h.tree).includes('原文件和标注'));
-  assert(text(h.tree).includes('只取消登记'));
+  assert(text(h.tree).includes('保留原文件和标注'));
   await remove.props.onClick(); h.render();
   assert.deepEqual(h.calls, [[A]]);
   assert.equal(h.root(B).props.checked, true);

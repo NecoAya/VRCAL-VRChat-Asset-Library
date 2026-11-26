@@ -6,11 +6,11 @@
 .source-locations input:focus-visible{outline:2px solid var(--accent,#b39acb);outline-offset:3px}
 .source-locations-count{font-size:11px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .source-locations-toolbar>.button,.source-locations-toolbar>.text-button{min-height:30px;white-space:nowrap}
-.source-locations-list{max-height:320px;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding:1px 3px 1px 1px}
-html[data-theme] .source-locations .source-location-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;margin:8px 0;padding:10px;min-width:0}
+.source-locations-list{max-height:320px;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;margin:10px 0;padding:1px 3px 1px 1px}
+html[data-theme] .source-locations .source-location-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;margin:0;padding:8px 0;min-width:0;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent}
 .source-location-choice{min-height:30px}
 .source-location-choice>.icon{flex-shrink:0}
 .source-location-path{min-width:0;overflow-wrap:anywhere;word-break:break-word;line-height:1.7;user-select:text}
-.source-location-path>.setting-direct-source{display:block;margin-top:3px;font-size:10px}
+.source-location-path>.setting-direct-source{display:block;margin-top:3px;font-size:11px;color:var(--muted)}
 .source-locations .source-locations-error{color:var(--danger,#e8bcc4);overflow-wrap:anywhere}
-@media(max-width:420px){.source-locations-toolbar{gap:8px}.source-locations-toolbar>.button{margin-left:auto}.source-locations-toolbar>.text-button{padding:4px 0}.source-location-choice{gap:6px}.source-location-choice>.icon{display:none}html[data-theme] .source-locations .source-location-row{padding:8px;gap:7px}.source-locations-list{max-height:260px}}
+@media(max-width:420px){.source-locations-toolbar{gap:8px}.source-locations-toolbar>.button{margin-left:auto}.source-locations-toolbar>.text-button{padding:4px 0}.source-location-choice{gap:6px}.source-location-choice>.icon{display:none}html[data-theme] .source-locations .source-location-row{padding:6px 0;gap:7px}.source-locations-list{max-height:260px}}

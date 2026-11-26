@@ -71,7 +71,6 @@ export function ContextMenuSettings({ value, onChange, disabled = false }: Conte
       <button className="button small" type="button" disabled={locked || JSON.stringify(draft) === defaultKey}
         onClick={() => void save(normalizeContextMenuPreferences(DEFAULT_CONTEXT_MENU_PREFERENCES))}>{t('恢复默认')}</button>
     </div>
-    <p>{t('勾选要显示的选项，并用上移或下移调整顺序。仅显示当前素材可用的操作。')}</p>
     <ol className="context-menu-settings-list" aria-label={t('右键菜单选项')}>
       {draft.order.map((id, index) => {
         const name = t(labels.get(id) || id);

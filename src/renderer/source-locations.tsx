@@ -61,7 +61,7 @@ export function SourceLocations({roots, directSources = [], disabled, onRemove, 
 
   return <section className="setting-block source-locations" data-setting="source-locations" aria-busy={pending}>
     <h3>{t('素材位置')}</h3>
-    <p>{t('扫描此位置。原素材和工程保持原样。')}</p>
+    <p className="help-text">{t('仅停止扫描此路径，保留原文件和标注。')}</p>
     <div className="source-locations-toolbar">
       <label className="source-locations-select-all"><input ref={master} type="checkbox" aria-label="全选素材位置" aria-checked={mixed ? 'mixed' : allSelected} checked={allSelected} disabled={locked || !roots.length} onChange={event => {
         if (!locked && !submitting.current) setSelected(event.currentTarget.checked ? new Set(roots) : new Set());
@@ -72,7 +72,6 @@ export function SourceLocations({roots, directSources = [], disabled, onRemove, 
         if (!locked && !submitting.current) setSelected(new Set());
       }}>取消勾选</button>
     </div>
-    <p className="help-text source-locations-selection-help">可勾选多个位置一起移除；只取消登记并停止扫描，磁盘上的素材文件与已有标注都会保留。</p>
     {roots.length > 0 ? <div className="source-locations-list" role="group" aria-label="已登记素材位置">
       {roots.map(root => <div className="setting-path source-location-row" key={root}>
         <label className="source-location-choice">
@@ -92,9 +91,6 @@ export function SourceLocations({roots, directSources = [], disabled, onRemove, 
       </div>)}
     </div> : <p className="help-text source-locations-empty">尚未登记素材位置。</p>}
     {error && <p className="error-text source-locations-error" role="alert">{error}</p>}
-    <p className="help-text">{t('手动添加只读取所选内容；移除路径保留原文件和标注。')}</p>
-    <p className="help-text">{t('此文件夹及其子文件夹都会递归扫描。')}</p>
-    <p className="help-text">{t('仅停止扫描此路径，保留原文件和标注。')}</p>
-    <button className="button" onClick={add} disabled={locked}>{t('添加素材文件夹')}</button>
+    <button className="button" onClick={add} disabled={locked} title={t('此文件夹及其子文件夹都会递归扫描。')}>{t('添加素材文件夹')}</button>
   </section>;
 }

@@ -4,8 +4,7 @@ import {t} from './i18n';
 
 export function TaskNavigation({context,onSelect,counts,icon,inbox,collections}:{context:ReturnType<typeof navigationContext>;onSelect:(id:NavigationId)=>void;counts:Partial<Record<NavigationId,number>>;icon:(name:NavigationItem['icon'])=>ReactNode;inbox:ReactNode;collections:ReactNode}) {
  return <div className="task-navigation">{NAV_GROUPS.map(group=><section key={group.id} className={`navigation-group ${context.group===group.id?'current-group':''}`} data-navigation-group={group.id}>
-  <h2 className="sidebar-label">{t(group.label)}</h2>
-  <nav aria-label={t(group.label)}>{group.items.map(item=><button key={item.id} data-nav={item.id} className={`nav-item ${item.className??''} ${context.id===item.id?'active':''}`} aria-current={context.id===item.id?'page':undefined} title={t(item.description)} onClick={()=>onSelect(item.id)}>{icon(item.icon)}<span>{t(item.label)}</span>{item.id==='inbox'?inbox:counts[item.id]!==undefined?<small>{counts[item.id]}</small>:null}</button>)}</nav>
+  <nav aria-label={t(group.label)}>{group.items.map(item=><button key={item.id} data-nav={item.id} className={`nav-item ${item.className??''} ${context.id===item.id?'active':''}`} aria-current={context.id===item.id?'page':undefined} onClick={()=>onSelect(item.id)}>{icon(item.icon)}<span>{t(item.label)}</span>{item.id==='inbox'?inbox:(counts[item.id]??0)>0?<small>{counts[item.id]}</small>:null}</button>)}</nav>
   {group.id==='organize'&&context.group==='organize'&&collections}
  </section>)}</div>;
 }
@@ -28,5 +27,5 @@ export function NavigationShell({open,onClose,children}:{open:boolean;onClose:()
 export function AppearanceMenu({children,contextKey}:{children:ReactNode;contextKey:string}){
  const ref=useRef<HTMLDivElement>(null);
  useEffect(()=>{ref.current?.hidePopover()},[contextKey]);
- return <><button className="button small appearance-toggle" popoverTarget="workspace-appearance" aria-label="主题与语言">外观</button><div ref={ref} id="workspace-appearance" popover="auto" className="appearance-popover" aria-label="主题与语言"><div className="appearance-heading"><strong>主题与语言</strong><button className="icon-button" popoverTarget="workspace-appearance" popoverTargetAction="hide" aria-label="关闭外观设置">×</button></div>{children}</div></>;
+ return <><button className="button small appearance-toggle" popoverTarget="workspace-appearance" aria-label="主题与语言">外观</button><div ref={ref} id="workspace-appearance" popover="auto" className="appearance-popover" aria-label="主题与语言"><div className="appearance-heading"><button className="icon-button" popoverTarget="workspace-appearance" popoverTargetAction="hide" aria-label="关闭外观设置">×</button></div>{children}</div></>;
 }

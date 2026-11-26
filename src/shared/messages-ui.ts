@@ -792,6 +792,7 @@ export const UI_MESSAGES: Record<string, readonly [string, string]> = {
     "Name",
     "名前順"
   ],
+  "名称识别可能不完整。": ["Name detection may be incomplete.", "名前の検出結果は不完全な場合があります。"],
   "名称识别可能不完整。灰色表示尚无本地证据，不代表确定缺少该版本。": [
     "Name detection may be incomplete. Gray means no local evidence, rather than confirmed absence.",
     "名前の検出は不完全な場合があります。灰色はローカルの根拠が未検出で、欠落が確定した意味ではありません。"
