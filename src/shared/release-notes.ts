@@ -14,6 +14,11 @@ export interface ReleaseNote {
 // neither semver sorting nor this list determines the running/latest version.
 // This is bundled documentation and never requires a GitHub request.
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
+  {version:'1.4.2',date:'2026-11-26',channel:'stable',title:'界面精简与自定义 AI 服务商',sections:[
+    {kind:'improved',items:['精简导航、素材卡片、匹配确认、工作台、下载和设置，合并重复说明与状态，保留主要操作、进度和错误提示。']},
+    {kind:'added',items:['AI 设置支持自定义 OpenAI 兼容（Chat Completions）和 Anthropic Messages 服务商，可设置 HTTPS API 地址、模型 ID 和加密密钥。']},
+    {kind:'notes',items:['API 默认关闭。自定义请求发送到填写的地址；更换地址或协议后需重新填写密钥并确认发送范围。兼容性和计费由所选服务商决定。','继续使用原资料库，升级前备份并退出旧版；单文件版检查最新稳定发布，解压目录版从发布页手动更新。']},
+  ]},
   {version:'1.4.2-preview.1',date:'2026-11-26',channel:'preview',title:'界面精简',sections:[
     {kind:'improved',items:['移除重复的页面介绍、装饰标签和页脚，合并卡片中的重复状态，用留白划分操作区。','精简素材整理、改模工作台、下载和设置等页面，保留操作入口、必要状态和错误提示。']},
     {kind:'added',items:['纳入此前合并的自定义 AI 服务商支持，可配置 OpenAI 兼容或 Anthropic Messages 接口。']}

@@ -1,6 +1,7 @@
 // Exercise the real Electron UI offline with an isolated library and source.
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict');
 const {_electron}=require('playwright'),{Store}=require('../dist/main/main/store');
+const {RELEASE_NOTES}=require('../dist/main/shared/release-notes');
 const repo=path.resolve(__dirname,'..'),run=fs.mkdtempSync(path.resolve(repo,'../ui-release-notes-'));
 const root=path.join(run,'素材 日本語 😀'),profile=path.join(run,'Library');
 fs.mkdirSync(root,{recursive:true});
@@ -29,7 +30,21 @@ async function capture(name){await app.evaluate(async({BrowserWindow},file)=>{
   process.mainModule.require('node:fs').writeFileSync(file,(await w.webContents.capturePage(undefined,{stayHidden:true,stayAwake:true})).toPNG());
 },path.join(run,name+'.png'))}
 async function size(width,height){await app.evaluate(({BrowserWindow},{width,height})=>BrowserWindow.getAllWindows().find(w=>w.webContents.getURL().includes('/renderer/index.html')).setSize(width,height),{width,height})}
-async function language(value){await page.locator('[data-language-selector="header"]').selectOption(value);await page.waitForFunction(value=>document.documentElement.lang===value,value)}
+async function appearance(){
+  if(!await page.locator('#workspace-appearance').isVisible())await page.locator('.appearance-toggle').click();
+}
+async function language(value){
+  await appearance();
+  await page.locator('[data-language-selector="header"]').selectOption(value);
+  await page.waitForFunction(value=>document.documentElement.lang===value,value);
+  await page.keyboard.press('Escape');
+}
+async function changeTheme(value){
+  await appearance();
+  await page.locator('.theme-switch select').selectOption(value);
+  await page.waitForFunction(value=>document.documentElement.dataset.theme===value,value);
+  await page.keyboard.press('Escape');
+}
 (async()=>{
   await launch();await size(1480,940);
   await page.locator('[data-asset-search]').fill('Dress');
@@ -40,14 +55,15 @@ async function language(value){await page.locator('[data-language-selector="head
   await page.locator('.asset-card').first().locator('.card-select input').check();
   await page.locator('.asset-card.selected').waitFor();
   await page.locator('.updates-nav').click();await page.locator('.release-running strong').filter({hasText:require('../package.json').version}).waitFor();
-  assert.equal(await page.locator('.release-card').count(),require('../dist/main/shared/release-notes').RELEASE_NOTES.length);
+  assert.equal(await page.locator('.release-card').count(),RELEASE_NOTES.length);
   assert.equal(await page.locator('.release-card[data-running="true"]').count(),1);
   assert.equal(await page.locator('.updates-nav').getAttribute('aria-current'),'page');
   checks.push('Sidebar opens offline bundled history with actual runtime version and bundled chronological records');
-  await page.locator('[data-release-channel="stable"]').click();assert.equal(await page.locator('.release-card').count(),6);
+  await page.locator('[data-release-channel="stable"]').click();assert.equal(await page.locator('.release-card').count(),RELEASE_NOTES.filter(note=>note.channel==='stable').length);
+  assert.equal(await page.locator('.release-card[data-running="true"]').count(),1);
   await page.locator('.release-search').fill('1.1.0');assert.equal(await page.locator('.release-card').count(),1);
   await page.locator('[data-release-channel="local"]').click();await page.locator('.release-empty').waitFor();
-  await page.locator('.release-empty button').click();assert.equal(await page.locator('.release-card').count(),require('../dist/main/shared/release-notes').RELEASE_NOTES.length);
+  await page.locator('.release-empty button').click();assert.equal(await page.locator('.release-card').count(),RELEASE_NOTES.length);
   checks.push('Version search, channel filtering, empty state and filter reset work through actual controls');
   await page.locator('.sidebar-scroll nav .nav-item').first().click();
   assert.equal(await page.locator('[data-asset-search]').inputValue(),'Dress');
@@ -59,11 +75,10 @@ async function language(value){await page.locator('[data-language-selector="head
   checks.push('Settings > App updates opens the same history page and closes the settings dialog');
   const titles={'zh-CN':'版本时间线',en:'Version timeline',ja:'バージョンの歩み'};
   for(const locale of ['zh-CN','en','ja'])for(const theme of ['x','x-light','nasa','swiss']){
-    await language(locale);await page.locator('.theme-switch select').selectOption(theme);
-    await page.waitForFunction(theme=>document.documentElement.dataset.theme===theme,theme);
+    await language(locale);await changeTheme(theme);
     assert.equal(await page.locator('.release-intro h2').innerText(),titles[locale]);
     assert.equal(await page.locator('.release-page').evaluate(e=>e.scrollWidth>e.clientWidth+1),false);
-    assert.equal(await page.locator('.release-card').count(),require('../dist/main/shared/release-notes').RELEASE_NOTES.length);
+    assert.equal(await page.locator('.release-card').count(),RELEASE_NOTES.length);
     await capture('history-'+locale+'-'+theme);
     checks.push(locale+' '+theme+' history is translated, readable and fits its viewport');
   }
@@ -76,12 +91,12 @@ async function language(value){await page.locator('[data-language-selector="head
   assert.equal(await page.locator('.release-card').count(),1);
   await capture('history-980-200pct');
   checks.push('980px at 200% keeps history scrollable and its search usable without horizontal overflow');
-  await page.evaluate(()=>window.library.setZoom(1));await size(1480,940);await language('ja');await page.locator('.theme-switch select').selectOption('x-light');
+  await page.evaluate(()=>window.library.setZoom(1));await size(1480,940);await language('ja');await changeTheme('x-light');
   await app.close();app=null;await launch();
   assert.equal(await page.locator('html').getAttribute('lang'),'ja');
   assert.equal(await page.locator('html').getAttribute('data-theme'),'x-light');
   await page.locator('.updates-nav').click();await page.locator('.release-running strong').filter({hasText:require('../package.json').version}).waitFor();
-  assert.equal(await page.locator('.release-card').count(),require('../dist/main/shared/release-notes').RELEASE_NOTES.length);
+  assert.equal(await page.locator('.release-card').count(),RELEASE_NOTES.length);
   assert.equal((await page.evaluate(id=>window.library.get(id),first.id)).manual.notes,'KEEP ANNOTATIONS');
   assert.deepEqual(manifest(),before);assert.deepEqual(requests,[]);
   checks.push('Restart keeps preferences and annotations; history remains available offline and synthetic source names/hashes are unchanged');

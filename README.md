@@ -14,13 +14,11 @@
 
 [第三方组件、资源与参考来源](THIRD_PARTY_NOTICES.md) · [运行依赖许可全文索引](licenses/README.md)
 
-**当前正式版：1.4.1。** 新增只读 Prefab 层级、网格与近似材质组合预览，补充百度下载等待和验证提示。静态预览不保证适配，不还原 Unity 着色器、MA 或物理；真实账号下载仍需验收。[正式版说明](docs/RELEASE_1.4.1.zh-CN.md) · [English](docs/RELEASE_1.4.1.en.md) · [日本語](docs/RELEASE_1.4.1.ja.md)。
+**当前正式版 1.4.2。** 精简导航、素材卡片、工作台、下载和设置，新增可选的 OpenAI 兼容和 Anthropic Messages 自定义 AI 服务商。[正式版说明](docs/RELEASE_1.4.2.zh-CN.md) · [English](docs/RELEASE_1.4.2.en.md) · [日本語](docs/RELEASE_1.4.2.ja.md)。
 
 ## 下载与开始使用
 
-**[1.4.1 正式版发布与下载入口](https://github.com/NecoAya/VRCAL-VRChat-Asset-Library/releases/tag/v1.4.1)**：选择 `VRC-Asset-Library-1.4.1-x64.exe` 可直接运行；选择 `x64-Folder.zip` 则先完整解压，再运行其中的 `VRC素材库.exe`，以后直接从该目录启动。**单文件正式版通过内置更新检查最新稳定发布（`releases/latest`）；解压目录版仍需从发布页手动下载并完整解压新版。** `Source.zip` 仅用于开发。
-
-1.4.1 包含此前诊断预览的百度下载改进，进入稳定更新通道；仍不承诺所有分享均可下载或绕过平台验证。历史诊断说明保留供查阅。
+选择 `VRC-Asset-Library-1.4.2-x64.exe` 可直接运行。使用 `VRC-Asset-Library-1.4.2-x64-Folder.zip` 时先完整解压，再从解压目录启动 `VRC素材库.exe`。**单文件正式版通过内置更新检查最新稳定发布，解压目录版从发布页手动更新。** `Source.zip` 用于开发。[1.4.2 正式版发布与下载入口](https://github.com/NecoAya/VRCAL-VRChat-Asset-Library/releases/tag/v1.4.2)
 
 旧版官方附件继续停止提供。 版本记录、Git 历史及其原许可保留；GitHub 根据标签提供的历史 Source code 快照仍可访问。撤下下载不等于撤销旧版授权，详见 [许可变更说明](docs/LICENSING.md)。
 
@@ -52,7 +50,7 @@
 
 ## 本次更新与更新记录
 
-**1.4.2-preview.1：界面精简。** 清理装饰小字、重复说明和多层边框，保留关键操作、状态与提示。纳入此前合并的自定义 AI 服务商。[预览版说明](docs/RELEASE_1.4.2-preview.1.zh-CN.md) · [预览版下载](https://github.com/NecoAya/VRCAL-VRChat-Asset-Library/releases/tag/v1.4.2-preview.1)。
+**1.4.2** 将界面精简和自定义 AI 支持纳入稳定更新通道。应用内更新记录和 CHANGELOG 保留 1.4.2-preview.1 的历史。[预览版说明](docs/RELEASE_1.4.2-preview.1.zh-CN.md) · [历史发布页](https://github.com/NecoAya/VRCAL-VRChat-Asset-Library/releases/tag/v1.4.2-preview.1)。
 
 **1.4.1：Prefab 只读组合预览与百度下载提示。** 正式版纳入 Prefab 贡献及后续边界修复；保留 KelierAndes 署名。百度下载统一 45 秒启动等待、细分失败原因，并可主动查看应用内下载页面；仍不承诺真实账号或所有分享下载已修复。[正式版说明](docs/RELEASE_1.4.1.zh-CN.md)。此前诊断预览说明作为历史记录保留。
 
@@ -122,9 +120,9 @@ BOOTH 补全发送商品名称、编号等检索线索。人工资料优先，�
 
 BOOTH 与百度网盘登录通过各自官方网页完成，持久会话保存在所选资料库中；普通备份不包含登录凭证或下载的原素材。本公开仓库和发布包不含个人资料库、Cookie、购买记录或付费素材。
 
-## 本地开发中的自定义 AI
+## 自定义 AI 服务商
 
-AI 设置新增“自定义”，可填写 HTTPS API Base URL、模型与加密密钥，并选择 OpenAI 兼容或 Anthropic Messages。详见 [AI 配置说明](docs/AI_BACKEND.md)。这是未发布的源码改动，当前正式版下载仍为 1.4.1；本地构建不等于公开发布，真实服务兼容性需另行验收。
+在「设置与备份 → AI 分类与报错解释 → 服务商」选择「自定义」，填写可信服务商的 HTTPS API Base URL、模型 ID 和密钥，再选择 OpenAI 兼容（Chat Completions）或 Anthropic Messages。API 默认关闭，启用并确认发送范围后，请求会发送到所填地址。更换地址或协议需要重新填写密钥并确认授权。实际兼容性和费用取决于所选服务商。[AI 配置说明](docs/AI_BACKEND.md)
 
 ## 从源码运行
 

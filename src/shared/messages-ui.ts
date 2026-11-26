@@ -58,6 +58,8 @@ export const UI_MESSAGES: Record<string, readonly [string, string]> = {
   "来源取自内置 BOOTH 的实际下载，文件名不同无需再次确认。": ["来源取自内置 BOOTH 的实际下载，文件名不同无需再次确认。", "来源取自内置 BOOTH 的实际下载，文件名不同无需再次确认。"],
   "BOOTH 内置下载记录提供明确商品来源": ["BOOTH 内置下载记录提供明确商品来源", "BOOTH 内置下载记录提供明确商品来源"],
   "项目发起与维护": ["Project creator & maintainer", "プロジェクト発起人・メンテナー"],
+  "贡献 Unity Prefab 轻量 3D 预览，自 1.4.1 起可用": ["Contributed lightweight Unity Prefab 3D previews, available since 1.4.1", "Unity Prefab の軽量 3D プレビューを提供（1.4.1 から利用可能）"],
+  "贡献自定义 AI 服务商支持（OpenAI 兼容、Anthropic Messages）": ["Contributed custom AI provider support for OpenAI-compatible and Anthropic Messages APIs", "OpenAI 互換および Anthropic Messages API 向けのカスタム AI プロバイダー対応を提供"],
   "GitHub 主页": ["GitHub profile", "GitHub プロフィール"],
   "Bilibili 主页": ["Bilibili profile", "Bilibili プロフィール"],
   "查看全部贡献者": ["View all contributors", "すべての貢献者を見る"],

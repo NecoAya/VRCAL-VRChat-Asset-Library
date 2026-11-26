@@ -12,9 +12,12 @@ export const CONTRIBUTORS = [
   {id:'necoaya-github',label:'GitHub 主页',url:'https://github.com/NecoAya'},
   {id:'necoaya-bilibili',label:'Bilibili 主页',url:'https://space.bilibili.com/13551697'},
  ]},
- {handle:'KelierAndes',name:'KelierAndes',initials:'K',role:'提交 Unity Prefab 轻量 3D 预览改进（PR #3，评审中）',links:[
+ {handle:'KelierAndes',name:'KelierAndes',initials:'K',role:'贡献 Unity Prefab 轻量 3D 预览，自 1.4.1 起可用',links:[
   {id:'kelierandes-github',label:'GitHub 主页',url:'https://github.com/KelierAndes'},
   {id:'kelierandes-pr3',label:'PR #3',url:'https://github.com/NecoAya/VRCAL-VRChat-Asset-Library/pull/3'},
+ ]},
+ {handle:'NoSetViolin',name:'NoSetViolin',initials:'N',role:'贡献自定义 AI 服务商支持（OpenAI 兼容、Anthropic Messages）',links:[
+  {id:'nosetviolin-pr5',label:'PR #5',url:'https://github.com/NecoAya/VRCAL-VRChat-Asset-Library/pull/5'},
  ]},
 ] as const satisfies readonly Contributor[];
 export function communityUrl(id:unknown):string {

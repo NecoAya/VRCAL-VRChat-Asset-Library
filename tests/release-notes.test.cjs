@@ -18,20 +18,18 @@ function load(relative) {
 
 test('history separates public previews, unpublished trials and stable releases in chronological order', () => {
   const {RELEASE_NOTES, filterReleaseNotes} = load('shared/release-notes.ts');
-  assert.equal(RELEASE_NOTES[0].version, require('../package.json').version);
-  assert.equal(RELEASE_NOTES[0].channel, 'preview');
-  assert.equal(RELEASE_NOTES.find(note=>note.channel==='stable').version, '1.4.1');
+  const currentVersion = require('../package.json').version;
+  assert.equal(RELEASE_NOTES[0].version, currentVersion);
+  assert.equal(RELEASE_NOTES[0].channel, 'stable');
   const previews=filterReleaseNotes({channel:'preview'});
+  assert(previews.some(note=>note.version==='1.4.2-preview.1'));
   assert(previews.some(note=>note.version==='1.4.1-preview.1'));
-  assert(previews.some(note=>note.version===require('../package.json').version));
   assert(previews.some(note=>note.version==='1.4.0-preview.17'));
-  assert(!previews.some(note=>note.version==='1.4.0'));
+  assert(!previews.some(note=>note.version===currentVersion));
   assert(previews.every(note=>note.channel==='preview'));
-  assert(!filterReleaseNotes({channel:'local'}).some(note=>note.version===require('../package.json').version));
+  assert(!filterReleaseNotes({channel:'local'}).some(note=>note.version===currentVersion));
   const stable = filterReleaseNotes({channel:'stable',language:'zh-CN'});
-  assert.deepEqual(stable.map(entry=>entry.version), ['1.4.1','1.4.0','1.3.0','1.2.9','1.2.8','1.2.7','1.2.6','1.2.5','1.2.4','1.2.3','1.2.2','1.2.1','1.2.0','1.1.1','1.1.0','1.0.0']);
-  assert(!stable.some(note=>note.version===require('../package.json').version));
-  assert(!stable.some(note=>note.version==='1.4.0-preview.17'));
+  assert.deepEqual(stable.map(entry=>entry.version), ['1.4.2','1.4.1','1.4.0','1.3.0','1.2.9','1.2.8','1.2.7','1.2.6','1.2.5','1.2.4','1.2.3','1.2.2','1.2.1','1.2.0','1.1.1','1.1.0','1.0.0']);
   assert(RELEASE_NOTES.every((entry,index)=>!index || entry.date <= RELEASE_NOTES[index-1].date));
   assert.equal(new Set(RELEASE_NOTES.map(entry=>entry.version)).size, RELEASE_NOTES.length);
 });
@@ -51,10 +49,10 @@ test('history search finds translated changes and combines version and channel f
   assert.equal(JSON.stringify(RELEASE_NOTES),before);
 });
 
-test('previously translated release history remains available offline in English and Japanese', () => {
+test('stable 1.4.2 and previously translated release history are available offline in English and Japanese', () => {
   const {RELEASE_NOTES} = load('shared/release-notes.ts');
   const {translate} = load('shared/i18n.ts');
-  // New 1.3.0 copy is explicitly deferred for a later translation pass (2026-10-24).
+  // Archived 1.3.0 and preview entries were published with Chinese-only copy.
   for (const entry of RELEASE_NOTES.filter(entry=>!['1.3.0','1.4.2-preview.1'].includes(entry.version)&&!/^1\.4\.0-preview\./.test(entry.version))) for (const text of [entry.title,...entry.sections.flatMap(section=>section.items)]) {
     for (const language of ['en','ja']) assert.notEqual(translate(text,language),text,`${language}: ${text}`);
   }

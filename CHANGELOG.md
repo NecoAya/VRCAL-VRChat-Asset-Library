@@ -1,5 +1,14 @@
 # 版本记录
 
+## 1.4.2 · 2026-11-26 · 正式版
+
+- 精简导航、素材卡片、匹配确认、改模工作台、3D 预览、下载和设置。合并重复说明与状态，用留白整理操作区，保留主要操作、下载进度和错误提示。
+- AI 设置增加自定义 OpenAI 兼容（Chat Completions）和 Anthropic Messages 服务商，可配置 HTTPS API 地址、模型 ID 和加密密钥。感谢 NoSetViolin 贡献。[PR #5](https://github.com/NecoAya/VRCAL-VRChat-Asset-Library/pull/5)
+- API 默认关闭。自定义密钥与地址及协议绑定，更换任一项后需重新填写密钥、确认发送范围。实际接口兼容性、账号权限和费用取决于所选服务商。
+- 升级前备份并退出旧版，继续使用原资料库。单文件版使用稳定更新通道，解压目录版从发布页手动更新。
+
+[正式版说明](docs/RELEASE_1.4.2.zh-CN.md) · [English](docs/RELEASE_1.4.2.en.md) · [日本語](docs/RELEASE_1.4.2.ja.md)
+
 ## 1.4.2-preview.1 — 2026-11-26
 
 - 精简导航、素材卡片、匹配确认、工程、下载和设置，移除重复文案和嵌套边框。

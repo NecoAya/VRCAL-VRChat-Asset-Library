@@ -1,14 +1,14 @@
-# VRChat本地素材管理器 1.4.1 · Windows x64
+# VRChat本地素材管理器 1.4.2 · Windows x64
 
-当前正式版：**1.4.1**。[本版说明](RELEASE_1.4.1.zh-CN.md)：Prefab 只读组合预览与百度下载提示；静态预览不保证适配。
+当前正式版 **1.4.2**，精简页面标题、素材卡片和操作区，并加入可选的自定义 AI 服务商。[本版说明](RELEASE_1.4.2.zh-CN.md) · [English](QUICK_START.en.md) · [日本語](QUICK_START.ja.md)
 
 **第一次使用，请先阅读[1.2.7 版零基础图文手册](BEGINNER_GUIDE.zh-CN.md)。** 本页作为功能与开发参考，保留详细行为、历史版本说明和源码运行方法。
 
 **新增 3D 功能说明：[轻量 3D 预览与角色＋衣服静态组合](MODEL_PREVIEW.zh-CN.md)。** 在素材详情或单项右键菜单点击“3D 预览”，先选择衣服模型，再用“添加角色看上身参考”从本地资料库选择角色及其模型文件。可分别显隐、调整衣服位置与缩放、查看前后侧面；不依赖 Unity，不自动合骨骼、适配体型或修复穿模，不作为 Unity 实际试穿和安装结果。
 
-**本次正式版：[1.4.0 发布说明](RELEASE_1.4.0.zh-CN.md)。** 素材位置可多选、全选后批量取消登记；百度历史 ZIP 可勾选模型包与材质包，一起解压到新的素材目录并直接入库。自动解压和成功入库后回收原包均需自行开启，默认关闭。步骤见 [素材位置管理](SOURCE_LOCATIONS.zh-CN.md) 与 [下载与入库指南](DOWNLOADS.zh-CN.md)，MA 日志的判断边界见 [MA 菜单预览诊断说明](MA_MENU_PREVIEW_DIAGNOSTICS.zh-CN.md)。新增功能文字部分仍为中文；[English](QUICK_START.en.md) · [日本語](QUICK_START.ja.md) 提供本次升级和关键操作说明。
+**1.4.0 的素材位置与下载功能。** 素材位置可多选、全选后批量取消登记。百度历史 ZIP 可勾选模型包与材质包，一起解压到新的素材目录并直接入库。自动解压和成功入库后回收原包默认关闭。[素材位置管理](SOURCE_LOCATIONS.zh-CN.md) · [下载与入库指南](DOWNLOADS.zh-CN.md) · [MA 菜单预览诊断说明](MA_MENU_PREVIEW_DIAGNOSTICS.zh-CN.md)
 
-**[1.4.0 发布与下载入口](https://github.com/NecoAya/VRCAL-VRChat-Asset-Library/releases/tag/v1.4.0)**：下载 `VRC-Asset-Library-1.4.0-x64.exe` 可直接运行；下载 `VRC-Asset-Library-1.4.0-x64-Folder.zip` 则先完整解压，再启动其中的 `VRC素材库.exe`，保留整个目录。单文件 EXE 可检查稳定版更新；解压目录版仍从发布页手动更新。`Source.zip` 和 GitHub 自动生成的 Source code 是开发源码，Guide／Offline ZIP 是文档，都不是程序。
+下载 `VRC-Asset-Library-1.4.2-x64.exe` 可直接运行。目录版请完整解压 `VRC-Asset-Library-1.4.2-x64-Folder.zip`，再启动其中的 `VRC素材库.exe`，保留整个目录。单文件 EXE 可检查稳定版更新，目录版从发布页手动更新。`Source.zip` 和 GitHub 自动生成的 Source code 是开发源码，Guide／Offline ZIP 是文档。[1.4.2 发布与下载入口](https://github.com/NecoAya/VRCAL-VRChat-Asset-Library/releases/tag/v1.4.2)
 
 百度 ZIP 合并解压：在百度页面的“下载记录”勾选同一素材的模型包、材质包，点击“解压所选并入库”；结果写入一个新素材目录，各 ZIP 使用独立子目录，不覆盖同名文件。完成后查看“解压记录”或素材库，无需全局扫描。原包默认保留；“下载完成后自动解压 ZIP 并入库”与“解压并入库成功后，将原 ZIP 移至回收站”两项首次均关闭。只支持 ZIP，不自动导入 Unity。
 
@@ -18,9 +18,13 @@ v1.2.7 手册附件：[PDF 手册](https://github.com/NecoAya/VRCAL-VRChat-Asset
 
 ## 正式版与测试版升级
 
-升级前建议备份整理资料，正常退出旧版，再运行 1.4.0。继续使用原资料库和人工标注；如果询问保存位置，请选择原 `VRChatAssetLibrary` 文件夹的上级目录，不要另建空资料库。请在“更新记录”核对当前版本，下载新版后仍打开的旧窗口不会自行变成新版。
+升级前备份整理资料，正常退出旧版，再运行 1.4.2。继续使用原资料库和人工标注。如果询问保存位置，请选择原 `VRChatAssetLibrary` 文件夹的上级目录。在「更新记录」核对当前运行版本。
 
-1.0.0 是首次正式发布，之前的 1.9.x、1.10.x 都是测试版。编号重新起算，因此这些较大编号的旧测试版不会通过内置更新切换到 1.4.0，请手动下载运行一次。此前的公开预览按其发布页手动获取；1.4.0 单文件正式版后续可检查稳定版更新，解压目录版继续手动更新。旧测试版的程序附件已撤下，源码历史保留。
+1.0.0 是首次正式发布，之前的 1.9.x、1.10.x 都是测试版。由于正式版重新编号，这些旧测试版需手动下载并启动 1.4.2。此后单文件正式版可检查稳定版更新，解压目录版继续手动更新。旧测试版的程序附件已撤下，源码历史保留。
+
+## 使用自定义 AI 服务商
+
+在「设置与备份 → AI 分类与报错解释 → 服务商」选择「自定义」。按服务商文档选择 OpenAI 兼容（Chat Completions）或 Anthropic Messages，填写 HTTPS API Base URL、模型 ID 与 API 密钥。按需开启 AI 用途，确认发送范围并保存。启用后，所选用途的限长文本和认证信息会发送到该地址。更换地址或协议后，重新填写密钥并确认授权。[AI 配置与数据范围](AI_BACKEND.md)
 
 一个支持简体中文、英语和日语的 Windows 桌面素材管理应用。默认只读索引 `E:\VRChat`。首次启动由用户选择 C 盘之外的资料库位置，在所选上级目录下创建 `VRChatAssetLibrary`；备份位置也独立选择。
 
@@ -147,7 +151,7 @@ npm run dev
 npm run package
 ```
 
-本版源码打包输出 Windows x64 免安装程序 `VRC-Asset-Library-1.4.0-x64.exe`。先退出旧版窗口，再启动新版。应用自带运行时，使用者不需要安装 Node.js 或 Unity。源码安装阶段需要下载官方 Electron 运行时；环境使用代理时，请让下载工具使用对应代理。
+本版源码打包输出 Windows x64 免安装程序 `VRC-Asset-Library-1.4.2-x64.exe`。先退出旧版窗口，再启动新版。应用自带运行时，使用者不需要安装 Node.js 或 Unity。源码安装阶段需要下载官方 Electron 运行时；环境使用代理时，请让下载工具使用对应代理。
 
 ## 源文件保护
 
